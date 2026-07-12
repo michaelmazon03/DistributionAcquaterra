@@ -19,18 +19,27 @@ n_time_step=len(suf_time_step)
 matrice_tot_OF=[]
 lista_n_pixel_OF=[]
 
+def sort_coordinates([long,lat]):
 
-def main(labels_time_step):
-    determine_distrib_acquaterra()
-    determine_history_acquaterra()
-
-def determine_distrib_acquaterra():
-
+def pixels_inundated(start_long, start_lat, end_long, end_lat):
+    
+def determine_distrib_acquaterra(long_lgm, lat_lgm, long_present_day, lat_present_day):
+    long_lgm, lat_lgm=sort_coordinates([logn_lgm,lat_lgm])
+    long_present_day, lat_present_day=sort_coordinates([logn_present_day,lat_present_day])
+    distrib_acquaterra=pixels_inundated(long_lgm, lat_lgm, long_present_day_lat(present_day))
+    
+    
     return distrib_acquaterra
 
 def determine_history_acquaterra(labels_time_step):
 
     return history_acquaterra
+
+
+def main(labels_time_step):
+    determine_distrib_acquaterra()
+    determine_history_acquaterra()
+
     
     
 
