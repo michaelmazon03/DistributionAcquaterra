@@ -20,7 +20,24 @@ matrice_tot_OF=[]
 lista_n_pixel_OF=[]
 
 def sort_coordinates([long,lat]):
+    n_coord=len(long)
+    for i in range(n_coord):
+        long_test=long[i]
+        lat_test=lat[i]
+        n_cycles=n_coord-i
+        index_min=i
+        for j in range(n_cycles):
+            if lat_test>lat[j] and long_test>long[j]:
+                lat_test=lat[j]
+                long_test=long[j]
+                index_min=i+j
 
+        lat[index_min]=lat[i]
+        long[index_min]=long[i]
+        lat[i]=lat_test
+        long[i]=long_test
+                
+        
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
     
 def determine_distrib_acquaterra(long_lgm, lat_lgm, long_present_day, lat_present_day):
