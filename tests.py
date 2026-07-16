@@ -1,7 +1,7 @@
 #file test.py
 from distribution_acquaterra import sort_coordinates
 from distribution_acquaterra import pixels_inundated
-import numpy as np
+#import numpy as np
 import pytest
 def generate_coord():
     long=150.
@@ -24,11 +24,11 @@ def test_latitude_is_valid():
 def test_sorting_lat_is_correct():
     long=[250., 300., 280.]
     lat=[30., -30.5, 20.5]
-    sort_coordinates(long1,lat1)
+    sort_coordinates(long,lat)
 
 
     
-    assert [long, lat]==[[300., 280., 250.],[-30.5., 20.5, 30.]]
+    assert [long, lat]==[[300., 280., 250.],[-30.5, 20.5, 30.]]
     assert [long, lat]!=[[250., 300., 280.],[30., -30.5, 20.5]]
 
 def test_sorting_long_is_correct():
@@ -36,8 +36,8 @@ def test_sorting_long_is_correct():
     lat=[30., 30., 30.]
     sort_coordinates(long,lat)
 
-    assert [long1, lat1]==[[250., 280., 300.],[30.., 30., 30.]]
-    assert [long1, lat1]!=[[250., 300., 280.],[30., -30.5, 20.5]]
+    assert [long, lat]==[[250., 280., 300.],[30., 30., 30.]]
+    assert [long, lat]!=[[250., 300., 280.],[30., -30.5, 20.5]]
 
 def test_sorting_latitudes_already_sorted():
     initial_lat=[10., 20., 30.]
@@ -58,7 +58,8 @@ def test_sorting_longitudes_already_sorted():
 
     assert [long_var, lat_var]==[initial_long, initial_lat]
     
-def test_determination_pixels_inundated_is_correct():
+#def test_determination_pixels_inundated_is_correct():
+    
     
     
     
