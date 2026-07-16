@@ -27,7 +27,12 @@ def sort_coordinates(long,lat):
         n_cycles=n_coord-i
         index_min=i
         for j in range(n_cycles):
-            if lat_test>=lat[i+j] and long_test>long[i+j]:
+            if lat_test>lat[i+j]:
+                #if long_test>long[i+j]:
+                lat_test=lat[i+j]
+                long_test=long[i+j]
+                index_min=i+j
+            elif lat_test==lat[i+j] and long_test>long[i+j]:
                 lat_test=lat[i+j]
                 long_test=long[i+j]
                 index_min=i+j
