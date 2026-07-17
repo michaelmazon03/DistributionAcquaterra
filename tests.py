@@ -1,6 +1,7 @@
 #file test.py
 from distribution_acquaterra import sort_coordinates
 from distribution_acquaterra import pixels_inundated
+from distribution_acquaterra import regional_acquaterra
 import numpy as np
 import pytest
 def generate_coord():
@@ -91,6 +92,59 @@ def test_no_pixels_have_been_inundated():
                                                   end_long, end_lat)
 
     assert len(long_inundated)==0
+
+def test_regional_acquaterra_works():
+    lat_AT=np.array([10.,50.])
+    long_AT=np.array([20.,20.])
+    lat_min_reg=5.
+    lat_max_reg=15.
+    long_min_reg=15.
+    long_max_reg=25.
+
+    long_regional, lat_regional=regional_acquaterra(long_min_reg, long_max_reg,
+                                                    lat_min_reg, lat_max_reg,
+                                                    long_AT, lat_AT)
+
+    assert len(lat_regional)==1 and len(long_regional)==1.
+    assert lat_regional[0]==10. and long_regional==20.
+
+def test_longitude_on_regional_AT():
+
+    lat_AT=np.array([10.,50.])
+    long_AT=np.array([1.,20.])
+    lat_min_reg=5.
+    lat_max_reg=15.
+    long_min_reg=355.
+    long_max_reg=5.
+
+    long_regional, lat_regional=regional_acquaterra(long_min_reg, long_max_reg,
+                                                    lat_min_reg, lat_max_reg,
+                                                    long_AT, lat_AT)
+
+    assert len(lat_regional)==1 and len(long_regional)==1.
+    assert lat_regional[0]==10. and long_regional==1.
+    
+def test_longitude_smaller_than_360_on_region():
+
+    lat_AT=np.array([10.,50.])
+    long_AT=np.array([-1.,20.])
+    lat_min_reg=5.
+    lat_max_reg=15.
+    long_min_reg=355.
+    long_max_reg=5.
+
+    long_regional, lat_regional=regional_acquaterra(long_min_reg, long_max_reg,
+                                                    lat_min_reg, lat_max_reg,
+                                                    long_AT, lat_AT)
+
+    assert len(lat_regional)==1 and len(long_regional)==1.
+    assert lat_regional[0]==10. and long_regional==-1.
+    
+    
+
+
+    
+    
     
     
     
