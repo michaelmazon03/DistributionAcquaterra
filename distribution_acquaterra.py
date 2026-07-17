@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 #definizione directory e file
 dir_home=os.getcwd()
 dir_output=dir_home+"\\output"
+dir_data=dir_home+"\\data"
 
 if not(os.path.isdir(dir_output)):
     os.mkdir("output")
@@ -56,44 +57,70 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     for j in range(n_pixels_start):
         pixel_has_been_inundated=True
         n_pixels_end=len(end_long_test)
-        for i in range(n_pixels_long):
+        for i in range(len(end_long_test)):
             if start_long[j]==end_long[i] and start_lat[j]==end_lat[i]:
                 pixel_has_been_inundated=False
                 np.delete(end_long_test, range(0,i))
                 np.delete(end_lat_test, range(0,i))
                 break
         
-        mask_pizels_inundated.append(pixel_has_been_inundated)
+        mask_pixels_inundated.append(pixel_has_been_inundated)
     lat_pixels_inundated=start_lat[mask_pixels_inundated]
     long_pixels_inundated=start_long[mask_pixels_inundated]
     
     return long_pixels_inundated, lat_pixels_inundated
     
 def determine_distrib_acquaterra(long_lgm, lat_lgm, long_present_day, lat_present_day):
-    long_lgm, lat_lgm=sort_coordinates([logn_lgm,lat_lgm])
-    long_present_day, lat_present_day=sort_coordinates([logn_present_day,lat_present_day])
-    distrib_acquaterra=pixels_inundated(long_lgm, lat_lgm, long_present_day_lat(present_day))
-    
-    
-    return distrib_acquaterra
+    long_acquaterra, lat_acquaterra=pixels_inundated(long_lgm, lat_lgm, long_present_day_lat(present_day))
+
+    return long_acquaterra, lat_acquaterra
 
 def determine_history_acquaterra(labels_time_step):
 
     return history_acquaterra
+
+def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
+    assert len(long_acquaterra)==len(lat_acquaterra)
+    assert lat_min<lat_max
+    assert lat_min>=-90. and lat_min<90.
+    assert lat_max>-90. and lat_max<=90.
+    assert long_min>=0. and long_min<=360.
+    assert lat_max>=0. and lat_max<=360.
+    
+    n_pixels_acquaterra=len(long_acquaterra)
+    mask_region=[]
+    
+    pixel_is_in_the_reagion=False
+
+    for i in range(n_pixels_acquaterra):
+        pixel_is_in_the_reagion=False
+        if long_min<long_max:
+            if long_acquaterra[i]>long_min and long_acquaterra[i]<long_max:
+                if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
+                    pixel_is_in_the_reagion=True
+        elif long_max<long_min:
+             if long_acquaterra[i]>long_min or long_acquaterra[i]<long_max:
+                if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
+                    pixel_is_in_the_reagion=True
+        mask_region.append(pixel_is_in_the_reagion)
+    
+
+    long_regional_acquaterra=long_acquaterra[mask_region]    
+    lat_regional_acquaterra=lat_acquaterra[mask_region]
+    
+    return long_regional_acquaterra, lat_regional_acquaterra
+
+    
 
 
 def main():
     determine_distrib_acquaterra()
     determine_history_acquaterra()
 
-    
-    
-
- 
-    dir_file_acquaterra=dir_output+"\\coordinate_acquaterra.dat"
+    #dir_file_acquaterra=dir_output+"\\coordinate_acquaterra.dat"
+    os.chdir(dir_data)
     file_primo_step="continent.026.0.dat"
     file_ultimo_step="continent.000.0.dat"
-
     long_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(0), dtype='f8')
     lat_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(1), dtype='f8')
     long_ultimo_step=np.genfromtxt(file_ultimo_step, comments='#', usecols=(0), dtype='f8')
@@ -159,8 +186,6 @@ def main():
     lat_acquaterra=lat_acquaterra[mask_coord_acquaterra]
     long_acquaterra=long_acquaterra[mask_coord_acquaterra]
 
-
-
     os.chdir(dir_output)
 
     n_acquaterra=len(long_acquaterra)
@@ -172,8 +197,7 @@ def main():
     np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
     f.close()
 
-
-    os.chdir(dir_home)
+    os.chdir(dir_data)
     file_primo_step="continent.026.0.dat"
     long_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(0), dtype='f8')
     lat_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(1), dtype='f8')
@@ -198,7 +222,7 @@ def main():
     n_pixels_storia_acquaterra[0]=n_acquaterra
     for j in range(n_time_step):
     ##    coord=coord_primo[j]
-        os.chdir(dir_home)
+        os.chdir(dir_data)
         file_name="continent."+suf_time_step[j]+".dat"
         longitudine=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
         latitudine=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
@@ -215,12 +239,12 @@ def main():
             coppia.append(latitudine[i-1])
             coordinate_corrente.append(coppia)
 
-        
         n_coord_corrente=len(coordinate_corrente)
         coord_corrente_copia=coordinate_corrente
         n_veri=0
         n=0
         mask_confronto=[]
+
         for coord in coord_primo:
             n_coord_copia=len(coord_corrente_copia)
             n=n+1
@@ -304,8 +328,6 @@ def main():
         print("il risultato per la storia del acquaterra è: "+str(n_pixel_corrente))
         print("ho finito confronto con file "+file_name)
 
-
-        
         os.chdir(dir_output)
         n_pixels_storia_acquaterra[j+1]=n_pixel_corrente
         res=np.zeros(n_pixel_corrente, dtype=[("var1",float),("var2",float)])
@@ -315,8 +337,6 @@ def main():
         f=open(nome_file+".dat","w")
         np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
         f.close()
-
-
 
     plt.figure(figsize=(14,10))
     time_step=np.arange(0.,26.,-0.5)
