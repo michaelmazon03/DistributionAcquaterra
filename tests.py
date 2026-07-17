@@ -1,7 +1,7 @@
 #file test.py
 from distribution_acquaterra import sort_coordinates
 from distribution_acquaterra import pixels_inundated
-#import numpy as np
+import numpy as np
 import pytest
 def generate_coord():
     long=150.
@@ -58,7 +58,40 @@ def test_sorting_longitudes_already_sorted():
 
     assert [long_var, lat_var]==[initial_long, initial_lat]
     
-#def test_determination_pixels_inundated_is_correct():
+def test_determination_pixels_inundated_is_correct():
+    common_long=100.
+    common_lat=10.
+    initial_long=np.array([common_long, 150.])
+    initial_lat=np.array([common_lat, 10.])
+    end_long=np.array([common_long])
+    end_lat=np.array([common_lat])
+    long_inundated, lat_inundated=pixels_inundated(initial_long, initial_lat,
+                                                  end_long, end_lat)
+    assert len(long_inundated)==1
+    assert long_inundated[0]==150. and lat_inundated[0]==10.
+
+def test_all_pixels_have_been_inundated():
+    initial_lat=np.array([-20.,-10.,10.,20.])
+    initial_long=np.array([0.,0.,0.,0.,])
+    end_lat=np.array([10.])
+    end_long=np.array([10.])
+    long_inundated, lat_inundated=pixels_inundated(initial_long, initial_lat,
+                                                  end_long, end_lat)
+
+    assert len(long_inundated)==4
+
+def test_no_pixels_have_been_inundated():
+    common_lat=[-20.,-10.,10.,20.]
+    common_long=[0.,0.,0.,0.,]
+    initial_lat=np.array(common_lat)
+    initial_long=np.array(common_long)
+    end_lat=np.array(common_lat)
+    end_long=np.array(common_long)
+    long_inundated, lat_inundated=pixels_inundated(initial_long, initial_lat,
+                                                  end_long, end_lat)
+
+    assert len(long_inundated)==0
+    
     
     
     
