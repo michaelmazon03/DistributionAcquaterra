@@ -110,6 +110,48 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
     
     return long_regional_acquaterra, lat_regional_acquaterra
 
+def mean_sea_level_acquaterra(long_acquaterra, lat_acquaterra, sea_level):
+    assert len(long_acquaterra)==len(lat_acquaterra)
+    assert len(long_acquaterra)==len(sea_level)
+    n_pixels=float(len(long_acquaterra))
+    mean_sl=0.
+    for level in sea_level:
+        mean_sl+=level
+    mean_sl=mean_sl/n_pixels
+    
+
+    return mean_sl
+    
+def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global):
+    assert len(long_acquaterra)==len(lat_acquaterra)
+    assert len(long_global)==len(lat_global)
+
+    sort_coordinates(long_acquaterra, lat_acquaterra)
+    sort_coordinates(long_global, lat_global)
+    n_pixels_acquaterra=len(long_acquaterra)
+    n_pixels_global=len(long_global)
+    mask_pixels_acquaterra=[]
+
+    global_lat_test=lat_global
+    global_long_test=long_global
+    for j in range(n_pixels_acquaterra):
+        pixel_is_acquaterranian=False
+        n_pixels_end=len(global_long_test)
+        for i in range(len(global_long_test)):
+            if long_acquaterra[j]==global_long_test[i] and lat_acquaterra[j]==global_lat_test[i]:
+                pixel_is_acquaterranian=True
+                np.delete(global_long_test, range(0,i))
+                np.delete(global_lat_test, range(0,i))
+                break
+        
+        mask_pixels_acquaterra.append(pixel_is_acquaterranian)
+
+    
+    
+    
+    
+    
+
     
 
 
