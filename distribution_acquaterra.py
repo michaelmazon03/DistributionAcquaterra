@@ -145,6 +145,7 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
                 break
         
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
+        return mask_pixels_acquaterra
 
     
     
