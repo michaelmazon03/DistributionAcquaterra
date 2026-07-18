@@ -58,7 +58,7 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
         pixel_has_been_inundated=True
         n_pixels_end=len(end_long_test)
         for i in range(len(end_long_test)):
-            if start_long[j]==end_long[i] and start_lat[j]==end_lat[i]:
+            if start_long[j]==end_long_test[i] and start_lat[j]==end_lat_test[i]:
                 pixel_has_been_inundated=False
                 np.delete(end_long_test, range(0,i))
                 np.delete(end_lat_test, range(0,i))
