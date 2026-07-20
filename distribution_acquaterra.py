@@ -76,7 +76,7 @@ def determine_distrib_acquaterra(long_lgm, lat_lgm, long_present_day, lat_presen
     return long_acquaterra, lat_acquaterra
 
 def determine_history_acquaterra(labels_time_step):
-
+    
     return history_acquaterra
 
 def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
@@ -110,16 +110,59 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
     
     return long_regional_acquaterra, lat_regional_acquaterra
 
-def mean_sea_level_acquaterra(long_acquaterra, lat_acquaterra, sea_level):
+def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
     assert len(long_acquaterra)==len(lat_acquaterra)
-    assert len(long_acquaterra)==len(sea_level)
-    n_pixels=float(len(long_acquaterra))
+    assert lat_min<lat_max
+    assert lat_min>=-90. and lat_min<90.
+    assert lat_max>-90. and lat_max<=90.
+    n_pixels_acquaterra=len(long_acquaterra)
+    pixel_is_in_the_reagion=False
+    mask_region=[]
+    for i in range(n_pixels_acquaterra):
+        pixel_is_in_the_reagion=False
+        if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
+            pixel_is_in_the_reagion=True
+        mask_region.append(pixel_is_in_the_reagion)
+    lat_zonal_AT=lat_acquaterra[mask_region]
+    long_zonal_AT=long_acquaterra[mask_region]
+    return long_zonal_AT, lat_zonal_AT
+
+def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
+    assert len(long_acquaterra)==len(lat_acquaterra)
+    n_pixels_acquaterra=len(long_acquaterra)
+    lat_max_arctic=90.
+    lat_min_arctic=66.
+    lat_max_north_mid_latitudes=66.
+    lat_min_north_mid_latitudes=23.
+    lat_max_tropics=23.
+    lat_min_tropics=-23.
+    lat_max_south_mid_latitudes=-23.
+    lat_min_south_mid_latitudes=-66.
+    lat_max_antarctic=-66.
+    lat_min_antarctic=-90.
+    long_arctic, lat_arctic =zonal_acquaterra(lat_min_arctic, lat_max_arctic, long_acquaterra, lat_acquaterra)
+    long_north_mid_latitude, lat_north_mid_latitude =zonal_acquaterra(lat_min_north_mid_latitudes, lat_max_north_mid_latitudes,
+                                                                      long_acquaterra, lat_acquaterra)
+    long_tropics, lat_tropics =zonal_acquaterra(lat_min_tropics, lat_max_tropics, long_acquaterra, lat_acquaterra)
+    long_south_mid_latitudes, lat_south_mid_latitudes =zonal_acquaterra(lat_min_south_mid_latitudes, lat_max_south_mid_latitudes,
+                                                                        long_acquaterra, lat_acquaterra)
+    long_antarctic, lat_antarctic =zonal_acquaterra(lat_min_antarctic, lat_max_antarctic, long_acquaterra, lat_acquaterra)
+    
+    perc_arctic=len(long_arctic)/n_pixels_acquaterra*100.
+    perc_north_mid_lat=len(long_north_mid_latitude)/n_pixels_acquaterra*100.
+    perc_tropics=len(long_tropics)/n_pixels_acquaterra*100.
+    perc_south_mid_lat=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
+    perc_antarctic=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
+
+    return perc_arctic, perc_north_mid_lat, perc_tropics, perc_south_mid_lat, perc_antarctic
+
+def mean_sea_level_acquaterra(sea_level):
+    n_pixels=float(len(sea_level))
     mean_sl=0.
     for level in sea_level:
         mean_sl+=level
     mean_sl=mean_sl/n_pixels
     
-
     return mean_sl
     
 def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global):
@@ -145,7 +188,7 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     assert j==n_pixels_acquaterra
     return mask_pixels_acquaterra
 
-    
+
     
     
     
