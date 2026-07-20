@@ -132,20 +132,18 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     n_pixels_global=len(long_global)
     mask_pixels_acquaterra=[]
 
-    global_lat_test=lat_global
-    global_long_test=long_global
-    for j in range(n_pixels_acquaterra):
+    j=0
+    for i in range(n_pixels_global):
+       # n_pixels_end=len(global_long_test)
         pixel_is_acquaterranian=False
-        n_pixels_end=len(global_long_test)
-        for i in range(len(global_long_test)):
-            if long_acquaterra[j]==global_long_test[i] and lat_acquaterra[j]==global_lat_test[i]:
-                pixel_is_acquaterranian=True
-                np.delete(global_long_test, range(0,i))
-                np.delete(global_lat_test, range(0,i))
-                break
-        
+        if j==n_pixels_acquaterra:
+            pixel_is_acquaterranian=False
+        elif long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
+            pixel_is_acquaterranian=True
+            j=j+1
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
-        return mask_pixels_acquaterra
+    assert j==n_pixels_acquaterra
+    return mask_pixels_acquaterra
 
     
     
