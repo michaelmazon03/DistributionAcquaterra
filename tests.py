@@ -2,7 +2,9 @@
 from distribution_acquaterra import sort_coordinates
 from distribution_acquaterra import pixels_inundated
 from distribution_acquaterra import (regional_acquaterra,
-                                     mask_pixels_acquaterra)
+                                     mask_pixels_acquaterra,
+                                     zonal_acquaterra,
+                                     percentage_zonal_distrib_AT)
 import numpy as np
 import pytest
 def generate_coord():
@@ -157,6 +159,59 @@ def test_mask_acquaterra_works():
     assert len(mask_AT)==5
     assert mask_AT[1] and mask_AT[3]
     assert mask_AT.count(True)==2
+
+def test_zonal_AT_works():
+    lat_AT=np.array([-85., -60., -20., 0., 15., 30., 50., 80.])
+    long_AT=np.array([10.,10.,10.,10.,10.,10.,10.,10.])
+    lat_min=-20.
+    lat_max=40.
+    long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
+    assert len(long_reg)==3
+    assert long_reg[0]==10. and lat_reg[0]==0.
+    assert long_reg[1]==10. and lat_reg[1]==15.
+    assert long_reg[2]==10. and lat_reg[2]==30.
+
+def test_no_AT_pixels_in_zonal_region():
+    lat_AT=np.array([-85., -60., -20., 0., 15., 30., 50., 80.])
+    long_AT=np.array([10.,10.,10.,10.,10.,10.,10.,10.])
+    lat_min=-10.
+    lat_max=-5.
+    long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
+    assert len(long_reg)==0
+
+
+def test_all_AT_pixels_are_in_the_zonal_reg():
+    lat_AT=np.array([ -60., -20., 0., 15., 30., 50.])
+    long_AT=np.array([10.,10.,10.,10.,10.,10.])
+    lat_min=-65.
+    lat_max=60.
+    long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
+    assert len(long_reg)==6
+    assert long_reg.all()==long_AT.all() and lat_reg.all()==lat_AT.all()
+
+
+def test_percentage_zonal_distrib_AT_works():
+    lat_AT=np.array([-85., -60., -20., 0., 15.,16., 30., 50.,55., 80.])
+    long_AT=np.array([10.,10.,10.,10.,10.,10.,10.,10.,10.,10.])
+    arctic, north_mlat, trop, south_mlat, ant=percentage_zonal_distrib_AT(long_AT,lat_AT)
+    assert arctic==10.
+    assert north_mlat==30.
+    assert trop==40.
+    assert south_mlat==10.
+    assert ant==10.
+
+def test_all_AT_pixels_are_in_the_tropics():
+    lat_AT=np.array([ -20., 0., 15.,16.])
+    long_AT=np.array([10.,10.,10.,10.])
+    arctic, north_mlat, trop, south_mlat, ant=percentage_zonal_distrib_AT(long_AT,lat_AT)
+    assert arctic==0.
+    assert north_mlat==0.
+    assert trop==100.
+    assert south_mlat==0.
+    assert ant==0.
+    
+
+    
 
 
     
