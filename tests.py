@@ -1,7 +1,8 @@
 #file test.py
 from distribution_acquaterra import sort_coordinates
 from distribution_acquaterra import pixels_inundated
-from distribution_acquaterra import regional_acquaterra
+from distribution_acquaterra import (regional_acquaterra,
+                                     mask_pixels_acquaterra)
 import numpy as np
 import pytest
 def generate_coord():
@@ -71,6 +72,8 @@ def test_determination_pixels_inundated_is_correct():
     assert len(long_inundated)==1
     assert long_inundated[0]==150. and lat_inundated[0]==10.
 
+
+
 def test_all_pixels_have_been_inundated():
     initial_lat=np.array([-20.,-10.,10.,20.])
     initial_long=np.array([0.,0.,0.,0.,])
@@ -139,6 +142,23 @@ def test_longitude_smaller_than_360_on_region():
 
     assert len(lat_regional)==1 and len(long_regional)==1.
     assert lat_regional[0]==10. and long_regional==-1.
+
+def test_mask_acquaterra_works():
+    global_lat=np.array([-60.,-30.,0.,30.,60.])
+    global_long=np.array([100.,50.,100.,50.,100.,])
+    lat_AT=np.zeros(2)
+    long_AT=np.zeros(2)
+    lat_AT[0]=global_lat[1]
+    long_AT[0]=global_long[1]
+    lat_AT[1]=global_lat[3]
+    long_AT[1]=global_long[3]
+
+    mask_AT=mask_pixels_acquaterra(long_AT, lat_AT, global_long, global_lat)
+    assert len(mask_AT)==5
+    assert mask_AT[1] and mask_AT[3]
+    assert mask_AT.count(True)==2
+
+
     
     
 
