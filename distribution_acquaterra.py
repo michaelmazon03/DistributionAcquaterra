@@ -11,14 +11,27 @@ dir_data=dir_home+"\\data"
 if not(os.path.isdir(dir_output)):
     os.mkdir("output")
 
-labels_time_step=["000.5","001.5","002.5","003.5","004.5","005.5","006.5","007.5","008.5","009.5",
-                  "010.5","011.5","012.5","013.5","014.5","015.5","016.5","017.5","018.5","019.5",
-                  "020.5","021.5","022.5","023.5","024.5","025.5"]
-#suf_time_step1=["001.0","002.0","003.0","004.0","005.0","006.0","007.0","008.0","009.0","010.0","011.0","012.0","013.0","014.0","015.0","016.0","017.0","018.0","019.0","020.0","021.0","022.0","023.0","024.0","025.0"]
+
+
+labels_time_step=["000.0","000.5","001.0","001.5","002.0","002.5","003.0","003.5","004.0","004.5",
+                  "005.0","005.5","006.0","006.5","007.0","007.5","008.0","008.5","009.0","009.5",
+                  "010.0","010.5","011.0","011.5","012.0","012.5","013.0","013.5","014.0","014.5",
+                  "015.0","015.5","016.0","016.5","017.0","017.5","018.0","018.5","019.0","019.5",
+                  "020.0","020.5","021.0","021.5","022.0","022.5","023.0","023.5","024.0","024.5",
+                  "025.0","025.5","026.0"]
 
 n_time_step=len(labels_time_step)
-matrice_tot_OF=[]
-lista_n_pixel_OF=[]
+
+#value parameters
+
+#Earth's parameters
+earth_radius=6371.
+R=100
+n_total_pixels=40*R*(R-1)+12
+area_pixel=(4*np.pi*earth_radius**2)/float(n_total_pixels)
+earth_area=4.*np.pi*earth_radius**2.
+
+
 
 def sort_coordinates(long,lat):
     n_coord=len(long)
@@ -188,246 +201,111 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     assert j==n_pixels_acquaterra
     return mask_pixels_acquaterra
 
+def read_file_coordinates(file_name):
+    os.chdir(dir_data)
+    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
+    
+    return long, lat
 
-    
-    
-    
+def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
+    assert len(long_distrib)==len(lat_distrib)
+    os.chdir(dir_output)
+
+    n_distrib=len(long_distrib)
+    res=np.zeros(n_distrib, dtype=[("var1",float),("var2",float)])
+    res["var1"]=long_distrib
+    res["var2"]=lat_distrib
+    f=open(nome_file+".dat","w")
+    np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
+    f.close()
     
 
     
 
 
 def main():
-    determine_distrib_acquaterra()
-    determine_history_acquaterra()
-
-    #dir_file_acquaterra=dir_output+"\\coordinate_acquaterra.dat"
-    os.chdir(dir_data)
-    file_primo_step="continent.026.0.dat"
-    file_ultimo_step="continent.000.0.dat"
-    long_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(0), dtype='f8')
-    lat_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(1), dtype='f8')
-    long_ultimo_step=np.genfromtxt(file_ultimo_step, comments='#', usecols=(0), dtype='f8')
-    lat_ultimo_step=np.genfromtxt(file_ultimo_step, comments='#', usecols=(1), dtype='f8')
-    n_primo=len(long_primo_step)
-    n_ultimo=len(long_ultimo_step)
-
-    coord_primo=[]
-    coord_ultimo=[]
-    mask_coord_acquaterra=[]
-    coord_acquaterra=[]
-    print("sto generando lista coordinate file "+file_primo_step)
-    for i in range(n_primo):
-        coppia=np.zeros(2)
-        coppia[0]=long_primo_step[i-1]
-        coppia[1]=lat_primo_step[i-1]
-        coord_primo.append(coppia)
-
-    print("sto generando lista coordinate file "+file_ultimo_step)
-    for i in range(n_ultimo):
-        coppia=[]
-        coppia.append(long_ultimo_step[i-1])
-        coppia.append(lat_ultimo_step[i-1])
-        coord_ultimo.append(coppia)
-
-    copia_coord_ultimo=coord_ultimo
-    n_copia_ultimo=len(copia_coord_ultimo)
-    n_veri=0
-    n=0
-    for coord in coord_primo:
-        n=n+1
-        if n==100:
-            print("ho anallizzato 100 pixel")
-        elif n==500:
-            print("ho anallizzato 500 pixel")
     
-        for i in range(n_copia_ultimo):
-            coord_confronto=copia_coord_ultimo[i]
-            if coord[0]==coord_confronto[0] and coord[1]==coord_confronto[1]:
-                cond=False
-                copia_coord_ultimo.remove(coord_confronto)
-                n_copia_ultimo=n_copia_ultimo-1
-                break
-        if cond==True:
-            n_veri=n_veri+1
-        mask_coord_acquaterra.append(cond)
-        if n_veri==10:
-            print("ho trovato 10 pixel")
-        elif n_veri==50:
-            print("ho trovato 50 pixel")
 
-    print("ho finito la ricerca dei pixel dell'acquaterra")
-    print("pixel tempo presente che hanno C=1 ma che avevano C=0 in t=26 kyr: "+str(n_copia_ultimo))
+    #Determination of acquaterra (AT) distribution
+    file_CF_LGM="continent.026.0.dat"
+    file_CF_present_day="continent.000.0.dat"
 
-    n=len(coord_primo)
-    lat_acquaterra=np.zeros(n)
-    long_acquaterra=np.zeros(n)
-    for i in range(n):
-        coord=coord_primo[i]
-        lat_acquaterra[i]=coord[1]
-        long_acquaterra[i]=coord[0]
+    long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
+    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
+    
+    long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
+                                                     lat_CF_LGM,
+                                                     long_CF_present_day,
+                                                     lat_CF_present_day)
 
-    lat_acquaterra=lat_acquaterra[mask_coord_acquaterra]
-    long_acquaterra=long_acquaterra[mask_coord_acquaterra]
+    #Save the output
+    file_name="distribution_acquaeterra.dat"
+    save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
+   
 
-    os.chdir(dir_output)
+    #Determination history acquaterra
 
-    n_acquaterra=len(long_acquaterra)
-    res=np.zeros(n_acquaterra, dtype=[("var1",float),("var2",float)])
-    res["var1"]=long_acquaterra
-    res["var2"]=lat_acquaterra
-    nome_file="coordinate_acquaterra"
-    f=open(nome_file+".dat","w")
-    np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
-    f.close()
-
-    os.chdir(dir_data)
-    file_primo_step="continent.026.0.dat"
-    long_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(0), dtype='f8')
-    lat_primo_step=np.genfromtxt(file_primo_step, comments='#', usecols=(1), dtype='f8')
-    n_primo=len(long_primo_step)
-    coord_primo=[]
-    mask_coord_acquaterra=[]
-    coord_acquaterra=[]
-
-    print("sto generando lista coordinate file "+file_primo_step)
-    for i in range(n_primo):
-        coppia=np.zeros(2)
-        coppia[0]=long_primo_step[i-1]
-        coppia[1]=lat_primo_step[i-1]
-        coord_primo.append(coppia)
-    for i in range(n_acquaterra):
-        coppia=np.zeros(2)
-        coppia[0]=long_acquaterra[i-1]
-        coppia[1]=lat_acquaterra[i-1]
-        coord_acquaterra.append(coppia)
-
-    n_pixels_storia_acquaterra=np.zeros(n_time_step+1)
-    n_pixels_storia_acquaterra[0]=n_acquaterra
+    n_pixels_history_AT=np.zeros(n_time_step)
     for j in range(n_time_step):
-    ##    coord=coord_primo[j]
-        os.chdir(dir_data)
-        file_name="continent."+suf_time_step[j]+".dat"
-        longitudine=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
-        latitudine=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
-        n=len(longitudine)
-        
-        lista_n_pixel_OF.append(n)
-        coordinate_corrente=[]
-        print("sto leggendo il time step "+suf_time_step[j])
-        latitudine_copia=latitudine
-        longitudine_copia=longitudine
-        for i in range(n):
-            coppia=[]
-            coppia.append(longitudine[i-1])
-            coppia.append(latitudine[i-1])
-            coordinate_corrente.append(coppia)
+        file_name="continent."+labels_time_step[j]+".dat"
+        long_CF_current, lat_CF_current= read_file_coordinates(file_name)
 
-        n_coord_corrente=len(coordinate_corrente)
-        coord_corrente_copia=coordinate_corrente
-        n_veri=0
-        n=0
-        mask_confronto=[]
-
-        for coord in coord_primo:
-            n_coord_copia=len(coord_corrente_copia)
-            n=n+1
-            if n==10:
-                print("ho anallizzato 10 pixel")
-            elif n==50:
-                print("ho anallizzato 50 pixel")
-            elif n==100:
-                print("ho anallizzato 100 pixel")
-            elif n==500:
-                print("ho anallizzato 500 pixel")
-            elif n==1000:
-                print("ho anallizzato 1000 pixel")
-            elif n==100000:
-                print("ho anallizzato 100000 pixel")
-            elif n==150000:
-                print("ho anallizzato 150000 pixel")
-            elif n==200000:
-                print("ho anallizzato 200000 pixel")
-            cond=True
-            for i in range(n_coord_copia):
-                coord_confronto=coord_corrente_copia[i]
-                if coord[0]==coord_confronto[0] and coord[1]==coord_confronto[1]:
-                    cond=False
-                    coord_corrente_copia.remove(coord_confronto)
-                    break
-            if cond==True:
-                n_veri=n_veri+1
-            mask_confronto.append(cond)
-        print("ho finito confronto con file "+file_name)
-
-        n=len(coord_primo)
-        lat_acquaterra_corrente=np.zeros(n)
-        long_acquaterra_corrente=np.zeros(n)
-        for i in range(n):
-            coord=coord_primo[i]
-            lat_acquaterra_corrente[i]=coord[1]
-            long_acquaterra_corrente[i]=coord[0]
-
-        lat_acquaterra_corrente=lat_acquaterra_corrente[mask_confronto]
-        long_acquaterra_corrente=long_acquaterra_corrente[mask_confronto]
-        coord_AT_corrente=[]
-        print("diffrenza fra i due file è: "+str(len(lat_acquaterra_corrente)))
-        for i in range(len(lat_acquaterra_corrente)):
-            coppia=[]
-            coppia.append(long_acquaterra_corrente[i-1])
-            coppia.append(lat_acquaterra_corrente[i-1])
-            coord_AT_corrente.append(coppia)
-        coordinate_confronto_copia=coord_AT_corrente
-        print("sto facendo il confronto fra acquaterra_primo step con quello corrente")
-        n=0
-        mask_confronto_acquaterra=[]
-        
-        for coord in coord_acquaterra:
-            n_coord_copia=len(coordinate_confronto_copia)
-            n=n+1
-            if n==1000:
-                print("ho anallizzato 1000 pixel")
-            elif n==5000:
-                print("ho anallizzato 5000 pixel")
-            elif n==10000:
-                print("ho anallizzato 10000 pixel")
-            elif n==15000:
-                print("ho anallizzato 15000 pixel")
-            cond=True
-            for i in range(n_coord_copia):
-                coord_confronto=coordinate_confronto_copia[i]
-                if coord[0]==coord_confronto[0] and coord[1]==coord_confronto[1]:
-                    cond=False
-                    coordinate_confronto_copia.remove(coord_confronto)
-                    print("ho trovat un vero")
-                    break
-
-            mask_confronto_acquaterra.append(cond)
+        long_AT_current, lat_AT_current=pixels_inundated(long_acquaterra,
+                                                         lat_acquaterra,
+                                                         long_AT_current,
+                                                         lat_AT_current)
             
-        long_AT_corrente=long_acquaterra
-        lat_AT_corrente=lat_acquaterra
-        long_AT_corrente=long_AT_corrente[mask_confronto_acquaterra]
-        lat_AT_corrente=lat_AT_corrente[mask_confronto_acquaterra]
-        n_pixel_corrente=len(long_AT_corrente)
-        print("il risultato per la storia del acquaterra è: "+str(n_pixel_corrente))
-        print("ho finito confronto con file "+file_name)
+        
+        nome_file="coordinates_acquaterra"+labels_time_step[j]
+        save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
+        n_pixels_history_AT[j]=len(long_AT_current)
 
-        os.chdir(dir_output)
-        n_pixels_storia_acquaterra[j+1]=n_pixel_corrente
-        res=np.zeros(n_pixel_corrente, dtype=[("var1",float),("var2",float)])
-        res["var1"]=long_AT_corrente
-        res["var2"]=lat_AT_corrente
-        nome_file="coordinate_acquaterra"+suf_time_step[j]
-        f=open(nome_file+".dat","w")
-        np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
-        f.close()
+    history_acquaterra=n_pixels_history_AT/n_tot_pixel*100.
+    history_acquaterra=np.flip(history_acquaterra)
+    history_acquaterra=history_acquaterra*earth_area*0.01*10**(-3.)
 
-    plt.figure(figsize=(14,10))
-    time_step=np.arange(0.,26.,-0.5)
-    plt.plot(time_step,n_pixels_storia_acquaterra, color="g", linestyle='-', marker='o', marker_size=10)
-    plt.xlabel('year BP [kyr]')
-    plt.ylabel('relative area acquaterra')
+    derivata_area=np.zeros(len(storia_acquaterra))
+    for i in range(len(storia_acquaterra)):
+        if i==0:
+            derivata_area[i]=(storia_acquaterra[i+1]-storia_acquaterra[i])*2.
+        elif i==len(storia_acquaterra)-1:
+            derivata_area[i]=(storia_acquaterra[i]-storia_acquaterra[i-1])*2.
+        else:
+            derivata_area[i]=((storia_acquaterra[i]-storia_acquaterra[i-1])*2.+(storia_acquaterra[i+1]-storia_acquaterra[i])*2.)*0.5
+
+
+    plt.figure(figsize=(10,6))
+    time_step=np.arange(26,-0.5,-0.5)
+    os.chdir(dir_plot)
+    plt.xlim(26,0)
+    plt.plot(time_step,storia_acquaterra, color="r", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.xlabel('year BP [kyr]', fontsize=15)
+    plt.ylabel('Area acquaterra [km^2 * 10^3]', fontsize=15)
+    #plt.yticks(np.arange(0,4,0.5))
+    plt.xticks(np.arange(26,-1,-2))
     plt.savefig('graph_time_evolution_acquaterra.png', dpi=150)
+
+
+
+    plt.figure(figsize=(10,6))
+    time_step=np.arange(26,-0.5,-0.5)
+    os.chdir(dir_plot)
+    plt.xlim(26,0)
+    plt.plot(time_step,derivata_area, color="b", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.xlabel('year BP [kyr]', fontsize=15)
+    plt.ylabel('Derivata area acquaterra [km^2 * 10^3 \ 500 yr]', fontsize=12)
+    #plt.yticks(np.arange(0,4,0.5))
+    plt.xticks(np.arange(26,-1,-2))
+    plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
+    plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b")
+    ##plt.annotate("WMP-1a", xy=(14.8,0.), fontsize=12)
+    ##plt.annotate("WMP-1b", xy=(11.5,0.), fontsize=12)
+    plt.legend(loc="lower right", fontsize=14)
+
+    plt.savefig('derivata_area_acquaterra.png', dpi=150)
+
+    return
 
 if __name__=="__main_":
     main()
