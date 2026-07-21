@@ -1,29 +1,16 @@
 #file test.py
-from distribution_acquaterra import sort_coordinates
-from distribution_acquaterra import pixels_inundated
-from distribution_acquaterra import (regional_acquaterra,
+from distribution_acquaterra import (sort_coordinates,
+                                     pixels_inundated,
+                                     regional_acquaterra,
                                      mask_pixels_acquaterra,
                                      zonal_acquaterra,
                                      percentage_zonal_distrib_AT)
 import numpy as np
 import pytest
-def generate_coord():
-    long=150.
-    lat=45.
-    return [long,lat]
+
 
 
 ###########################################
-
-
-def test_longitude_is_valid():
-    coord=generate_coord()
-    assert coord[0]>0. and coord[1]<360.
-
-def test_latitude_is_valid():
-    coord=generate_coord()
-    assert coord[1]>-90. and coord[1]<90.
-
 
 def test_sorting_lat_is_correct():
     long=[250., 300., 280.]
@@ -145,6 +132,35 @@ def test_longitude_smaller_than_360_on_region():
     assert len(lat_regional)==1 and len(long_regional)==1.
     assert lat_regional[0]==10. and long_regional==-1.
 
+    
+def test_lat_border_region_is_not_included():
+    lat_AT=np.array([5.,50.])
+    long_AT=np.array([20.,20.])
+    lat_min_reg=5.
+    lat_max_reg=15.
+    long_min_reg=15.
+    long_max_reg=25.
+
+    long_regional, lat_regional=regional_acquaterra(long_min_reg, long_max_reg,
+                                                    lat_min_reg, lat_max_reg,
+                                                    long_AT, lat_AT)
+
+    assert len(lat_regional)==0 and len(long_regional)==0.
+
+def test_long_border_region_is_not_included():
+    lat_AT=np.array([10.,50.])
+    long_AT=np.array([15.,20.])
+    lat_min_reg=5.
+    lat_max_reg=15.
+    long_min_reg=15.
+    long_max_reg=25.
+
+    long_regional, lat_regional=regional_acquaterra(long_min_reg, long_max_reg,
+                                                    lat_min_reg, lat_max_reg,
+                                                    long_AT, lat_AT)
+
+    assert len(lat_regional)==0 and len(long_regional)==0.
+    
 def test_mask_acquaterra_works():
     global_lat=np.array([-60.,-30.,0.,30.,60.])
     global_long=np.array([100.,50.,100.,50.,100.,])
@@ -161,8 +177,8 @@ def test_mask_acquaterra_works():
     assert mask_AT.count(True)==2
 
 def test_zonal_AT_works():
-    lat_AT=np.array([-85., -60., -20., 0., 15., 30., 50., 80.])
-    long_AT=np.array([10.,10.,10.,10.,10.,10.,10.,10.])
+    lat_AT=np.array([-85., -60., 0., 15., 30., 50., 80.])
+    long_AT=np.array([10.,10.,10.,10.,10.,10.,10.])
     lat_min=-20.
     lat_max=40.
     long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
@@ -188,6 +204,17 @@ def test_all_AT_pixels_are_in_the_zonal_reg():
     long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
     assert len(long_reg)==6
     assert long_reg.all()==long_AT.all() and lat_reg.all()==lat_AT.all()
+
+def test_latitude_limits_are_not_included():
+    lat_AT=np.array([ -20., 0., 15., 30., 40.])
+    long_AT=np.array([10.,10.,10.,10.,10.])
+    lat_min=-20.
+    lat_max=40.
+    long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
+    assert len(long_reg)==3
+    assert long_reg[0]==10. and lat_reg[0]==0.
+    assert long_reg[1]==10. and lat_reg[1]==15.
+    assert long_reg[2]==10. and lat_reg[2]==30.
 
 
 def test_percentage_zonal_distrib_AT_works():
