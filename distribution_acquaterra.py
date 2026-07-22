@@ -201,12 +201,34 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     assert j==n_pixels_acquaterra
     return mask_pixels_acquaterra
 
+def time_derevative_function(time_function):
+    time_derevative=np.zeros(len(time_function))
+    for i in range(len(time_function)):
+        if i==0:
+            time_derevative[i]=(time_function[i+1]-time_function[i])*2.
+        elif i==len(time_function)-1:
+            time_derevative[i]=(time_function[i]-time_function[i-1])*2.
+        else:
+            time_derevative[i]=((time_function[i]-time_function[i-1])*2.+(time_function[i+1]-time_function[i])*2.)*0.5
+    return time_derevative
+
+    
+    
+
 def read_file_coordinates(file_name):
     os.chdir(dir_data)
     long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
     
     return long, lat
+
+def read_file_field_on_earth_suf(file_name):
+    os.chdir(dir_data)
+    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
+    field=np.genfromtxt(file_name, comments='#', usecols=(2), dtype='f8')
+    
+    return long, lat, field
 
 def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
     assert len(long_distrib)==len(lat_distrib)
@@ -216,10 +238,42 @@ def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
     res=np.zeros(n_distrib, dtype=[("var1",float),("var2",float)])
     res["var1"]=long_distrib
     res["var2"]=lat_distrib
-    f=open(nome_file+".dat","w")
+    f=open(file_name,"w")
     np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
     f.close()
+
+    return
+
+def save_plot_history_AT(history_AT,file_name):
     
+    plt.figure(figsize=(10,6))
+    time_step=np.arange(26,-0.5,-0.5)
+    os.chdir(dir_plot)
+    plt.xlim(26,0)
+    plt.plot(time_step,history_AT, color="r", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.xlabel('year BP [kyr]', fontsize=15)
+    plt.ylabel('Area acquaterra [km^2 * 10^3]', fontsize=15)
+    plt.xticks(np.arange(26,-1,-2))
+    plt.savefig(file_name, dpi=150)
+
+    return
+
+
+def save_plot_AT_time_derevative(AT_time_derevative,file_name):
+    plt.figure(figsize=(10,6))
+    time_step=np.arange(26,-0.5,-0.5)
+    os.chdir(dir_plot)
+    plt.xlim(26,0)
+    plt.plot(time_step,time_derevative_AT, color="b", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.xlabel('year BP [kyr]', fontsize=15)
+    plt.ylabel('AT area time derevative [km^2 * 10^3 \ 500 yr]', fontsize=12)
+    plt.xticks(np.arange(26,-1,-2))
+    plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
+    plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b"),   plt.legend(loc="lower right", fontsize=14)
+
+    plt.savefig(file_name, dpi=150)
+
+    return
 
     
 
@@ -242,8 +296,90 @@ def main():
     #Save the output
     file_name="distribution_acquaeterra.dat"
     save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
-   
 
+
+    #STATISTICS ACQUATERRA
+
+    #area acquaterra
+    n_pixels_AT=len(long_acquaterra)
+    area_AT=n_pixels_AT*area_pixels
+
+    
+    #MEAN SEA-LEVEL on acquaterra (AT)
+
+    #reading file topography
+    file_name='topo.000.0.dat'
+    long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
+    sea_level=topography*1.
+    #computing mean sea level on AT
+    mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
+    sea_level_AT=sea_level[mask_sea_level_AT]
+    mean_SL_AT=np.mean(sea_level_AT)
+
+    #REGIONAL ACQUATERRA
+    #longitudes and latitudes limits of mediterranean sea
+    des_region="Mediterranean sea"
+    reg_long_min=354.
+    reg_long_max=36.
+    reg_lat_min=30.
+    reg_lat_max=46.
+
+    reg_long_AT, reg_lat_AT=regional_acquaterra(reg_long_min,
+                                                reg_long_max,
+                                                reg_lat_min,
+                                                reg_lat_max,
+                                                long_acquaterra,
+                                                lat_acquaterra)
+    
+    #Save the output
+    file_name="distribution_AT_mediterranean_sea.dat"
+    save_coord_distrib_as_txt_file(reg_long_AT, reg_lat_AT, file_name)
+
+    #area regional acquaterra
+
+    n_pixels_reg_AT=len(reg_long_AT)
+    area_reg_AT=n_pixels_reg_AT*area_pixels
+
+    #mean sea level on regional acquaterra
+    #reading file topography
+    file_name='topo.000.0.dat'
+    long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
+    sea_level=topography*1.
+    
+    mask_sl_reg_AT=mask_pixels_acquaterra(reg_long_AT, reg_lat_AT, long_global, lat_global)
+    sea_level_reg_AT=sea_level[mask_sl_reg_AT]
+    mean_SL_reg_AT=np.mean(sea_level_reg_AT)
+
+    #zonal ditribution acquaterra
+
+    perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant= percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra)
+
+    #save statistics
+    name_file="statistics_acquaterra.dat"
+    statistics=np.array([area_AT, mean_SL_AT, area_reg_AT, mean_SL_reg_AT,
+                         perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant])
+    desciption=np.array(["Area acquaterra [m^2]",
+                         "Mean sea-level [m]",
+                         "Area acquaterra "+des_region+" [m^2]",
+                         "Mean sea-level"+des_region+" [m]",
+                         "Percentage AT in arctic  [%]",
+                         "Percentage AT in northern mid latiudes  [%]",
+                         "Percentage AT in tropics  [%]",
+                         "Percentage AT in southern mid latitudes  [%]",
+                         "Percentage AT in antarctic  [%]"])
+    n_row=len(long_distrib)
+    res=np.zeros(n_row, dtype=[("var1",str),("var2",float)])
+    res["var1"]=description
+    res["var2"]=statistics
+    f=open(name_file,"w")
+    np.savetxt(f,res,delimiter="",fmt="%s\t %f\t", newline=os.linesep, header="description\t value\t\t")
+    f.close()
+    
+
+
+    
+    
+    
     #Determination history acquaterra
 
     n_pixels_history_AT=np.zeros(n_time_step)
@@ -263,49 +399,23 @@ def main():
 
     history_acquaterra=n_pixels_history_AT/n_tot_pixel*100.
     history_acquaterra=np.flip(history_acquaterra)
-    history_acquaterra=history_acquaterra*earth_area*0.01*10**(-3.)
+    history_acquaterra=history_acquaterra*area_pixel*0.01*10**(-3.)
 
-    derivata_area=np.zeros(len(storia_acquaterra))
-    for i in range(len(storia_acquaterra)):
-        if i==0:
-            derivata_area[i]=(storia_acquaterra[i+1]-storia_acquaterra[i])*2.
-        elif i==len(storia_acquaterra)-1:
-            derivata_area[i]=(storia_acquaterra[i]-storia_acquaterra[i-1])*2.
-        else:
-            derivata_area[i]=((storia_acquaterra[i]-storia_acquaterra[i-1])*2.+(storia_acquaterra[i+1]-storia_acquaterra[i])*2.)*0.5
+    time_derevative_AT=time_derevative_function(history_acquaterra)
 
+    
 
-    plt.figure(figsize=(10,6))
-    time_step=np.arange(26,-0.5,-0.5)
-    os.chdir(dir_plot)
-    plt.xlim(26,0)
-    plt.plot(time_step,storia_acquaterra, color="r", linestyle='-', lw=1, marker='o', markersize=3)
-    plt.xlabel('year BP [kyr]', fontsize=15)
-    plt.ylabel('Area acquaterra [km^2 * 10^3]', fontsize=15)
-    #plt.yticks(np.arange(0,4,0.5))
-    plt.xticks(np.arange(26,-1,-2))
-    plt.savefig('graph_time_evolution_acquaterra.png', dpi=150)
-
-
-
-    plt.figure(figsize=(10,6))
-    time_step=np.arange(26,-0.5,-0.5)
-    os.chdir(dir_plot)
-    plt.xlim(26,0)
-    plt.plot(time_step,derivata_area, color="b", linestyle='-', lw=1, marker='o', markersize=3)
-    plt.xlabel('year BP [kyr]', fontsize=15)
-    plt.ylabel('Derivata area acquaterra [km^2 * 10^3 \ 500 yr]', fontsize=12)
-    #plt.yticks(np.arange(0,4,0.5))
-    plt.xticks(np.arange(26,-1,-2))
-    plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
-    plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b")
-    ##plt.annotate("WMP-1a", xy=(14.8,0.), fontsize=12)
-    ##plt.annotate("WMP-1b", xy=(11.5,0.), fontsize=12)
-    plt.legend(loc="lower right", fontsize=14)
-
-    plt.savefig('derivata_area_acquaterra.png', dpi=150)
+    #plot
+    file_name='graph_evolution_acquaterra_area.png'
+    save_plot_history_AT(history_acquaterra,file_name)
+    file_name='graph_AT_area_time_derivative.png'
+    save_plot_AT_time_derevative(AT_time_derevative,file_name)
 
     return
+
+
+    
+main()
 
 if __name__=="__main_":
     main()
