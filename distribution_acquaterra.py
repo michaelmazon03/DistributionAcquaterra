@@ -2,6 +2,9 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 #definizione directory e file
 dir_home=os.getcwd()
@@ -28,14 +31,41 @@ n_time_step=len(labels_time_step)
 earth_radius=6371.
 R=100
 n_total_pixels=40*R*(R-1)+12
-area_pixel=(4*np.pi*earth_radius**2)/float(n_total_pixels)
+area_pixels=(4*np.pi*earth_radius**2)/float(n_total_pixels)
 earth_area=4.*np.pi*earth_radius**2.
 
 
 
 def sort_coordinates(long,lat):
+
+    assert len(long)==len(lat), (
+        f"Dimension of the longitudes={len(long)} and latitudes={len(lat)} numpy vectors are different;"
+        f"since they are coupled, their dimensions must be equal."
+    )
+    
     n_coord=len(long)
+    logging.info("Sorting: number of pixels to be valuated="+str(n_coord)+ " ...")
     for i in range(n_coord):
+
+        if i==int(n_coord/10.):
+            logging.debug("[1/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*2.):
+            logging.debug("[2/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*3.):
+            logging.debug("[3/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*4.):
+            logging.debug("[4/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*5.):
+            logging.debug("[5/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*6.):
+            logging.debug("[6/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*7.):
+            logging.debug("[7/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*8.):
+            logging.debug("[8/10] of the process. Sorted "+str(i)+" elements.")
+        elif i==int(n_coord/10.*9.):
+            logging.debug("[9/10] of the process. Sorted "+str(i)+" elements.")
+            
         long_test=long[i]
         lat_test=lat[i]
         n_cycles=n_coord-i
@@ -55,19 +85,37 @@ def sort_coordinates(long,lat):
         long[index_min]=long[i]
         lat[i]=lat_test
         long[i]=long_test
+
+    logging.debug("Sorting complited")
     return long, lat
                 
         
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
-    assert len(start_long)==len(start_lat)
-    assert len(end_long)==len(end_lat)
+    
+    assert len(start_long)==len(start_lat), (f"Dimension of the coupled vectors of starting longitudes = {len(start_long)}"
+                                             f"and latitudes = {len(start_lat)} are diffferent.")
+    assert len(end_long)==len(end_lat), (f"Dimension of the coupled vectors of final longitudes = {len(start_long)}"
+                                             f"and latitudes = {len(start_lat)} are diffferent.")
+
+    logging.debug("Sorting starts coordinates...")
     sort_coordinates(start_long, start_lat)
+    logging.debug("Sorting end coordinates...")
     sort_coordinates(end_long, end_lat)
     end_long_test=end_long
     end_lat_test=end_lat
     n_pixels_start=len(start_long)
     mask_pixels_inundated=[]
+
+    logging.debug("Evaluating pixels inundated. Number of pixels to be valuated="+str(n_pixels_start)+ " ...")
     for j in range(n_pixels_start):
+        if j==int(n_pixels_start/100.):
+            logging.info("analized "+str(j)+" elements...")
+        elif j==int(n_pixels_start/50.):
+            logging.info("analized "+str(j)+" elements...")
+        elif j==int(n_pixels_start/10.):
+            logging.info("analized "+str(j)+" elements...")
+        elif j==int(n_pixels_start/2.):
+            logging.info("analized "+str(j)+" elements...")
         pixel_has_been_inundated=True
         n_pixels_end=len(end_long_test)
         for i in range(len(end_long_test)):
@@ -281,13 +329,14 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
 def main():
     
 
-    #Determination of acquaterra (AT) distribution
+    #Determination of acquaterra (AT) distributio
+    logging.info("Compiuting distibution acquaterra...")
     file_CF_LGM="continent.026.0.dat"
     file_CF_present_day="continent.000.0.dat"
 
-    long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
-    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
     
+    long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
+    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)    
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
