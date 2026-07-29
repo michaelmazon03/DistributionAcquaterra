@@ -37,14 +37,16 @@ earth_area=4.*np.pi*earth_radius**2.
 
 
 def sort_coordinates(long,lat):
-
+    """sort the 1D numpy arrays of coordinates (long=longitude and lat=latitudes), first by ascending latitutude,
+    then by ascending longitude.
+    """
     assert len(long)==len(lat), (
         f"Dimension of the longitudes={len(long)} and latitudes={len(lat)} numpy vectors are different;"
         f"since they are coupled, their dimensions must be equal."
     )
     
     n_coord=len(long)
-    logging.info("Sorting: number of pixels to be valuated="+str(n_coord)+ " ...")
+    logging.debug("Sorting: number of pixels to be valuated="+str(n_coord)+ " ...")
     for i in range(n_coord):
 
         if i==int(n_coord/10.):
@@ -88,14 +90,37 @@ def sort_coordinates(long,lat):
 
     logging.debug("Sorting complited")
     return long, lat
+
+def check_coordinates_are_sorted(long, lat):
+    """check that the coordinate 1D arrays are already sorted according to the convention defined in the sort_coordinates function:
+    the coordinates are sorted first by ascending latitutude, then by ascending longitude. The function returns a boolean value.
+    """
+    assert len(long)==len(lat), (f"Dimensions of the coupled vectors of longitudes = {len(start_long)}"
+                                 f"and latitudes = {len(start_lat)} are different.")
+
+    n_coord=len(long)
+    arrays_are_sorted=True
+    for i in range(n_coord-1):
+        if lat[i]>lat[i+1]:
+            arrays_are_sorted=False
+        elif lat[i]==lat[i+1]:
+            if long[i]>long[i+1]:
+                arrays_are_sorted=False
+
+    return arrays_are_sorted
+        
                 
         
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
-    
-    assert len(start_long)==len(start_lat), (f"Dimension of the coupled vectors of starting longitudes = {len(start_long)}"
-                                             f"and latitudes = {len(start_lat)} are diffferent.")
-    assert len(end_long)==len(end_lat), (f"Dimension of the coupled vectors of final longitudes = {len(start_long)}"
-                                             f"and latitudes = {len(start_lat)} are diffferent.")
+    """given a pair of arrays (of longitudes and latitudes) of the pixels
+    of an initial distribution (start_long and start_lat)  describing  the dry land (continent function) and those of a
+    final distribution (end_long and end_lat), it returns the coordinate arrays of those pixels which disapear from the
+    initial distribution to the final ditribution; in other words, the pixels which have been inundated. 
+    """
+    assert len(start_long)==len(start_lat), (f"Dimensions of the coupled vectors of starting longitudes = {len(start_long)}"
+                                             f"and latitudes = {len(start_lat)} are different.")
+    assert len(end_long)==len(end_lat), (f"Dimensios of the coupled vectors of final longitudes = {len(end_long)}"
+                                             f"and latitudes = {len(end_lat)} are different.")
 
     logging.debug("Sorting starts coordinates...")
     sort_coordinates(start_long, start_lat)
@@ -108,16 +133,26 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
 
     logging.debug("Evaluating pixels inundated. Number of pixels to be valuated="+str(n_pixels_start)+ " ...")
     for j in range(n_pixels_start):
-        if j==int(n_pixels_start/100.):
-            logging.info("analized "+str(j)+" elements...")
-        elif j==int(n_pixels_start/50.):
-            logging.info("analized "+str(j)+" elements...")
-        elif j==int(n_pixels_start/10.):
-            logging.info("analized "+str(j)+" elements...")
-        elif j==int(n_pixels_start/2.):
-            logging.info("analized "+str(j)+" elements...")
+        if j==int(n_pixels_start/10.):
+            logging.debug("[1/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*2.):
+            logging.debug("[2/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*3.):
+            logging.debug("[3/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*4.):
+            logging.debug("[4/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*5.):
+            logging.debug("[5/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*6.):
+            logging.debug("[6/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*7.):
+            logging.debug("[7/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*8.):
+            logging.debug("[8/10] of the process. Analized "+str(j)+" elements.")
+        elif j==int(n_pixels_start/10.*9.):
+            logging.debug("[9/10] of the process. Analized "+str(j)+" elements.")
+        
         pixel_has_been_inundated=True
-        n_pixels_end=len(end_long_test)
         for i in range(len(end_long_test)):
             if start_long[j]==end_long_test[i] and start_lat[j]==end_lat_test[i]:
                 pixel_has_been_inundated=False
@@ -126,27 +161,38 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
                 break
         
         mask_pixels_inundated.append(pixel_has_been_inundated)
+
+    assert len(mask_pixels_inundated)==len(start_long), (f"Mask vector = {len(mask_pixels_inundated)}"
+                                                        f"must have the same dimension as the longitude vector = {len(start_lat)}"
+                                                        f" to which it is applied.")
     lat_pixels_inundated=start_lat[mask_pixels_inundated]
-    long_pixels_inundated=start_long[mask_pixels_inundated]
+    long_pixels_inundated=start_long[mask_pixels_inundated] 
     
     return long_pixels_inundated, lat_pixels_inundated
     
-def determine_distrib_acquaterra(long_lgm, lat_lgm, long_present_day, lat_present_day):
-    long_acquaterra, lat_acquaterra=pixels_inundated(long_lgm, lat_lgm, long_present_day_lat(present_day))
 
-    return long_acquaterra, lat_acquaterra
 
 def determine_history_acquaterra(labels_time_step):
     
     return history_acquaterra
 
 def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
-    assert len(long_acquaterra)==len(lat_acquaterra)
-    assert lat_min<lat_max
-    assert lat_min>=-90. and lat_min<90.
-    assert lat_max>-90. and lat_max<=90.
-    assert long_min>=0. and long_min<=360.
-    assert lat_max>=0. and lat_max<=360.
+    """given a limited, rectangular region of on earth's surface indicated by the latitudes (lat_min and lat_max) and longitudes(long_min and long_max)
+    limits and the global distribution of acquaterra, it returns the coordinate arrays of those acquaterranian pixels which are inside the given region
+    """
+    
+    
+    assert len(long_acquaterra)==len(lat_acquaterra), (f"Dimensions of the coupled vectors long_acquaterra = {len(long_acquaterra)}"
+                                                       f"and lat_acquaterra = {len(lat_acquaterra)} are different.")
+    assert lat_min<lat_max, (f"Minimum latitude = {lat_min} of the rectangular region "
+                            f"must be smaller than maximum latitude ={lat_max}.")
+    assert lat_min>=-90. and lat_min<90., (f"Latitudes are defined between -90 and 90 degrees."
+                                           f"So, minimum latitude= {lat_min} must be greater than or equal to -90 and less than 90.")
+    assert lat_max>-90. and lat_max<=90., (f"Maximum latitude= {lat_max} must be greater than -90 and less than or equal to 90.")
+    assert long_min>=0. and long_min<=360., (f"Longitudes are conventionally defined between 0 and 360 degrees."
+                                             f"Minimum longitudes= {long_min} is outside this range .")
+    assert long_max>=0. and long_max<=360., (f"Longitudes are conventionally defined between 0 and 360 degrees."
+                                             f"Maximum longitudes= {long_max} is outside this range.")
     
     n_pixels_acquaterra=len(long_acquaterra)
     mask_region=[]
@@ -164,18 +210,30 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
                 if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
                     pixel_is_in_the_reagion=True
         mask_region.append(pixel_is_in_the_reagion)
+    assert len(mask_region)==len(long_acquaterra), (f"Dimenstion Mask vector = {len(mask_region)}"
+                                                    f"must be equal to the dimention of the  vectors = {len(long_acquaterra)}"
+                                                    f" to which it is applied.")
     
-
     long_regional_acquaterra=long_acquaterra[mask_region]    
     lat_regional_acquaterra=lat_acquaterra[mask_region]
     
     return long_regional_acquaterra, lat_regional_acquaterra
 
 def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
-    assert len(long_acquaterra)==len(lat_acquaterra)
-    assert lat_min<lat_max
-    assert lat_min>=-90. and lat_min<90.
-    assert lat_max>-90. and lat_max<=90.
+    """given a zonal region of on earth's surface indicated by the latitudes (lat_min and lat_max)
+    limits and the global distribution of acquaterra, it returns the coordinate arrays of those
+    acquaterranian pixels which are inside the given zonal region.
+    """
+
+    assert len(long_acquaterra)==len(lat_acquaterra), (f"Dimentions of the coupled vectors long_acquaterra = {len(long_acquaterra)}"
+                                                       f"and lat_acquaterra = {len(lat_acquaterra)} are different.")
+    assert lat_min<lat_max, (f"Minimum latitude = {lat_min} of the rectangular region "
+                            f"must be smaller than maximum latitude ={lat_max}.")
+    assert lat_min>=-90. and lat_min<90., (f"Latitudes are defined between -90 and 90 degrees."
+                                           f"Minimum latitude= {lat_min} is outside this range.")
+    assert lat_max>-90. and lat_max<=90., (f"Latitudes are defined between -90 and 90 degrees."
+                                           f"Maximum latitude= {lat_max} is outside this range.")
+    
     n_pixels_acquaterra=len(long_acquaterra)
     pixel_is_in_the_reagion=False
     mask_region=[]
@@ -189,7 +247,12 @@ def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
     return long_zonal_AT, lat_zonal_AT
 
 def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
-    assert len(long_acquaterra)==len(lat_acquaterra)
+    """given the coordinate arrays of the acquaterra distribution, it returns the percentages of the acquaterra ditribution inside some specific
+    pre-defined zonal regions; specifically, they have  been  defined the arctic, northern mid-latitudes, tropics, southern mid-latitudes and antarctic regions.
+    """
+    assert len(long_acquaterra)==len(lat_acquaterra), (f"Dimentions of the coupled vectors long_acquaterra = {len(long_acquaterra)}"
+                                                       f"and lat_acquaterra = {len(lat_acquaterra)} are different.")
+
     n_pixels_acquaterra=len(long_acquaterra)
     lat_max_arctic=90.
     lat_min_arctic=66.
@@ -201,34 +264,42 @@ def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
     lat_min_south_mid_latitudes=-66.
     lat_max_antarctic=-66.
     lat_min_antarctic=-90.
+
+    logging.debug("computing acquaterra distribution on arctic")
     long_arctic, lat_arctic =zonal_acquaterra(lat_min_arctic, lat_max_arctic, long_acquaterra, lat_acquaterra)
+    logging.debug("computing acquaterra distribution on northern mid latitude")
     long_north_mid_latitude, lat_north_mid_latitude =zonal_acquaterra(lat_min_north_mid_latitudes, lat_max_north_mid_latitudes,
                                                                       long_acquaterra, lat_acquaterra)
+    logging.debug("computing acquaterra distribution on tropics")
     long_tropics, lat_tropics =zonal_acquaterra(lat_min_tropics, lat_max_tropics, long_acquaterra, lat_acquaterra)
+    logging.debug("computing acquaterra distribution on southern mid latitude")
     long_south_mid_latitudes, lat_south_mid_latitudes =zonal_acquaterra(lat_min_south_mid_latitudes, lat_max_south_mid_latitudes,
                                                                         long_acquaterra, lat_acquaterra)
+    logging.debug("computing acquaterra distribution on antarctic")
     long_antarctic, lat_antarctic =zonal_acquaterra(lat_min_antarctic, lat_max_antarctic, long_acquaterra, lat_acquaterra)
+
     
     perc_arctic=len(long_arctic)/n_pixels_acquaterra*100.
+    assert perc_arctic>=0. and perc_arctic<=100., (f"perc_arctic ={perc_arctic} must be a percentage within 0 and 100%")
     perc_north_mid_lat=len(long_north_mid_latitude)/n_pixels_acquaterra*100.
+    assert perc_north_mid_lat>=0. and perc_north_mid_lat<=100., (f"perc_north_mid_lat ={perc_north_mid_lat} must be a percentage within 0 and 100%")
     perc_tropics=len(long_tropics)/n_pixels_acquaterra*100.
+    assert perc_tropics>=0. and perc_tropics<=100., (f"perc_tropics ={perc_tropics} must be a percentage within 0 and 100%")
     perc_south_mid_lat=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
+    assert perc_south_mid_lat>=0. and perc_south_mid_lat<=100., (f"perc_south_mid_lat ={perc_south_mid_lat} must be a percentage within 0 and 100%")
     perc_antarctic=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
+    assert perc_antarctic>=0. and perc_antarctic<=100., (f"perc_antarctic ={perc_antarctic} must be a percentage within 0 and 100%")
 
     return perc_arctic, perc_north_mid_lat, perc_tropics, perc_south_mid_lat, perc_antarctic
 
-def mean_sea_level_acquaterra(sea_level):
-    n_pixels=float(len(sea_level))
-    mean_sl=0.
-    for level in sea_level:
-        mean_sl+=level
-    mean_sl=mean_sl/n_pixels
-    
-    return mean_sl
+
     
 def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global):
-    assert len(long_acquaterra)==len(lat_acquaterra)
-    assert len(long_global)==len(lat_global)
+    assert len(long_acquaterra)==len(lat_acquaterra), (f"Dimentions of the coupled vectors long_acquaterra = {len(long_acquaterra)}"
+                                                       f"and lat_acquaterra = {len(lat_acquaterra)} are diffferent.")
+    assert len(long_global)==len(lat_global), (f"Dimentions of the coupled vectors of the coordinates of every pixels of earth's surface"
+                                               f"long_global = {len(long_global)}"
+                                               f"and lat_global = {len(lat_global)} must be equal.")
 
     sort_coordinates(long_acquaterra, lat_acquaterra)
     sort_coordinates(long_global, lat_global)
@@ -246,18 +317,21 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
             pixel_is_acquaterranian=True
             j=j+1
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
-    assert j==n_pixels_acquaterra
+    assert j==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
+                                    f"is different to the number of pixels of the acquaterra distribution = {n_pixels_acquaterra}")
     return mask_pixels_acquaterra
 
-def time_derevative_function(time_function):
+def time_derevative_function(time_function, time_step):
+    
     time_derevative=np.zeros(len(time_function))
+    rec_den=1./time_step
     for i in range(len(time_function)):
         if i==0:
-            time_derevative[i]=(time_function[i+1]-time_function[i])*2.
+            time_derevative[i]=(time_function[i+1]-time_function[i])*rec_den
         elif i==len(time_function)-1:
-            time_derevative[i]=(time_function[i]-time_function[i-1])*2.
+            time_derevative[i]=(time_function[i]-time_function[i-1])*rec_den
         else:
-            time_derevative[i]=((time_function[i]-time_function[i-1])*2.+(time_function[i+1]-time_function[i])*2.)*0.5
+            time_derevative[i]=((time_function[i]-time_function[i-1])*rec_den+(time_function[i+1]-time_function[i])*2.)*0.5
     return time_derevative
 
     
@@ -314,7 +388,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     plt.xlim(26,0)
     plt.plot(time_step,time_derevative_AT, color="b", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
-    plt.ylabel('AT area time derevative [km^2 * 10^3 \ 500 yr]', fontsize=12)
+    plt.ylabel('AT area time derevative [km^2 * 10^3 / 500 yr]', fontsize=12)
     plt.xticks(np.arange(26,-1,-2))
     plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
     plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b"),   plt.legend(loc="lower right", fontsize=14)
@@ -343,11 +417,14 @@ def main():
                                                      lat_CF_present_day)
 
     #Save the output
+    logging.info("Saving output acquaterra distribution...")
     file_name="distribution_acquaeterra.dat"
     save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
 
 
     #STATISTICS ACQUATERRA
+
+    logging.info("Computing some statistics of acquaterra distribution...")
 
     #area acquaterra
     n_pixels_AT=len(long_acquaterra)
@@ -355,12 +432,11 @@ def main():
 
     
     #MEAN SEA-LEVEL on acquaterra (AT)
-
     #reading file topography
     file_name='topo.000.0.dat'
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
     sea_level=topography*1.
-    #computing mean sea level on AT
+    logging.info("Computing mean sea level on acquaterra")
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
     sea_level_AT=sea_level[mask_sea_level_AT]
     mean_SL_AT=np.mean(sea_level_AT)
@@ -373,6 +449,7 @@ def main():
     reg_lat_min=30.
     reg_lat_max=46.
 
+    logging.info("Computing distribution acquaterra in "+des_region)
     reg_long_AT, reg_lat_AT=regional_acquaterra(reg_long_min,
                                                 reg_long_max,
                                                 reg_lat_min,
@@ -381,6 +458,8 @@ def main():
                                                 lat_acquaterra)
     
     #Save the output
+                           
+    logging.debug("Saving output distribution acquaterra in "+des_region)
     file_name="distribution_AT_mediterranean_sea.dat"
     save_coord_distrib_as_txt_file(reg_long_AT, reg_lat_AT, file_name)
 
@@ -394,20 +473,23 @@ def main():
     file_name='topo.000.0.dat'
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
     sea_level=topography*1.
-    
+    logging.info("Computing mean sea level on the regional acquaterra:" +des_region)
     mask_sl_reg_AT=mask_pixels_acquaterra(reg_long_AT, reg_lat_AT, long_global, lat_global)
     sea_level_reg_AT=sea_level[mask_sl_reg_AT]
     mean_SL_reg_AT=np.mean(sea_level_reg_AT)
 
     #zonal ditribution acquaterra
-
+    logging.info("Computing zonal distribution acquaterra")
     perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant= percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra)
 
     #save statistics
+                           
     name_file="statistics_acquaterra.dat"
+    logging.debug("Saving statistics on file "+namefile+"...")
+    
     statistics=np.array([area_AT, mean_SL_AT, area_reg_AT, mean_SL_reg_AT,
                          perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant])
-    desciption=np.array(["Area acquaterra [m^2]",
+    description=np.array(["Area acquaterra [m^2]",
                          "Mean sea-level [m]",
                          "Area acquaterra "+des_region+" [m^2]",
                          "Mean sea-level"+des_region+" [m]",
@@ -416,7 +498,7 @@ def main():
                          "Percentage AT in tropics  [%]",
                          "Percentage AT in southern mid latitudes  [%]",
                          "Percentage AT in antarctic  [%]"])
-    n_row=len(long_distrib)
+    n_row=len(statistics)
     res=np.zeros(n_row, dtype=[("var1",str),("var2",float)])
     res["var1"]=description
     res["var2"]=statistics
@@ -430,9 +512,10 @@ def main():
     
     
     #Determination history acquaterra
-
+    logging.info("Computing time history of acquaterra")
     n_pixels_history_AT=np.zeros(n_time_step)
     for j in range(n_time_step):
+        #logging.debug("Computing distribution acquaterra at epoch "+labels_time_step[j]+" kyr BP")
         file_name="continent."+labels_time_step[j]+".dat"
         long_CF_current, lat_CF_current= read_file_coordinates(file_name)
 
@@ -442,7 +525,7 @@ def main():
                                                          lat_AT_current)
             
         
-        nome_file="coordinates_acquaterra"+labels_time_step[j]
+        file_name="coordinates_acquaterra"+labels_time_step[j]
         save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
         n_pixels_history_AT[j]=len(long_AT_current)
 
@@ -450,11 +533,15 @@ def main():
     history_acquaterra=np.flip(history_acquaterra)
     history_acquaterra=history_acquaterra*area_pixel*0.01*10**(-3.)
 
-    time_derevative_AT=time_derevative_function(history_acquaterra)
+    time_step=0.5
+    time_derevative_AT=time_derevative_function(history_acquaterra, time_step)
 
     
 
     #plot
+    logging.info("Producing graph of the history of acquaterra and its time derevative;and saving the"
+                 "figures...")
+    
     file_name='graph_evolution_acquaterra_area.png'
     save_plot_history_AT(history_acquaterra,file_name)
     file_name='graph_AT_area_time_derivative.png'
@@ -464,7 +551,7 @@ def main():
 
 
     
-main()
 
-if __name__=="__main_":
+
+if __name__=="__main__":
     main()
