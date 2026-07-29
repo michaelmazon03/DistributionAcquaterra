@@ -1,5 +1,6 @@
 #file test.py
 from distribution_acquaterra import (sort_coordinates,
+                                     check_coordinates_are_sorted,
                                      pixels_inundated,
                                      regional_acquaterra,
                                      mask_pixels_acquaterra,
@@ -416,6 +417,63 @@ def test_all_AT_pixels_are_in_the_tropics():
     assert trop==100.
     assert south_mlat==0.
     assert ant==0.
+
+def test_check_latitudes_are_sorted():
+    """this tests the check_coordinates_are_sorted function for the latitudes.
+
+    GIVEN:  the coordinate arrays (longitude and latitude) with the latitudes 
+    sorted.
+    WHEN: the check_coordinates_are_sorted function is applied
+    THEN: the function returns  the boolean value True
+    """
+
+    long=np.array([10., 10., 10.])
+    lat=np.array([10., 20., 30.])
+
+    assert check_coordinates_are_sorted(long, lat)
+
+def test_check_latitudes_are_not_sorted():
+    """this tests the check_coordinates_are_sorted function for the latitudes.
+
+    GIVEN:  the coordinate arrays (longitude and latitude) with the latitudes
+    not sorted.
+    WHEN: the check_coordinates_are_sorted function is applied
+    THEN: the function returns  the boolean value False
+    """
+
+    long=np.array([10., 10.,10.])
+    lat=np.array([20., 10., 30.])
+
+    assert not check_coordinates_are_sorted(long, lat)
+
+def test_check_longitudes_are_sorted():
+    """this tests the check_coordinates_are_sorted function for the longitudes.
+
+    GIVEN:  the coordinate arrays (longitude and latitude) with the longitude already
+    sorted and latitudes wirh the same value.
+    WHEN: the check_coordinates_are_sorted function is applied
+    THEN: the function returns  the boolean value True
+    """
+
+    long=np.array([10., 20.,30.])
+    lat=np.array([10., 10.,10.])
+
+    assert check_coordinates_are_sorted(long, lat)
+
+def test_check_longitudes_are_not_sorted():
+    """this tests the check_coordinates_are_sorted function for the longitudes.
+
+    GIVEN:  the coordinate arrays (longitude and latitude) with the longitudes 
+    not sorted. 
+    WHEN: the check_coordinates_are_sorted function is applied
+    THEN: the function returns  the boolean value False
+    """
+
+    long=np.array([10., 5.,15.])
+    lat=np.array([10., 10.,10.])
+
+    assert not check_coordinates_are_sorted(long, lat)
+
     
 
     
