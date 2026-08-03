@@ -91,6 +91,25 @@ def sort_coordinates(long,lat):
     logging.debug("Sorting complited")
     return long, lat
 
+
+def sort_coordinates_lexsort(long,lat):
+    """sort the 1D numpy arrays of coordinates (long=longitude and lat=latitudes), first by ascending latitutude,
+    then by ascending longitude.
+    """
+    assert len(long)==len(lat), (
+        f"Dimension of the longitudes={len(long)} and latitudes={len(lat)} numpy vectors are different;"
+        f"since they are coupled, their dimensions must be equal."
+    )
+    
+    
+    indices=np.lexsort((long,lat))
+
+    long[:]=long[indices]
+    lat[:]=lat[indices]
+    
+    logging.debug("Sorting complited")
+    return long, lat
+
 def check_coordinates_are_sorted(long, lat):
     """check that the coordinate 1D arrays are already sorted according to the convention defined in the sort_coordinates function:
     the coordinates are sorted first by ascending latitutude, then by ascending longitude. The function returns a boolean value.
@@ -122,10 +141,21 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     assert len(end_long)==len(end_lat), (f"Dimensios of the coupled vectors of final longitudes = {len(end_long)}"
                                              f"and latitudes = {len(end_lat)} are different.")
 
-    logging.debug("Sorting starts coordinates...")
-    sort_coordinates(start_long, start_lat)
-    logging.debug("Sorting end coordinates...")
-    sort_coordinates(end_long, end_lat)
+##    assert check_coordinates_are_sorted(start_long, start_lat), (f"The starting coordinate arrays (start_long and start_lat) are not sorted. The pixels_inundated"
+##                                                                 f"works properly with both the initial and final coordinates arrays given in input"
+##                                                                 f"which are properly  sorted  according to the convention defined in the"
+##                                                                 f"sort_coordinate function")
+##    assert check_coordinates_are_sorted(end_long, end_lat), (f"The final coordinate arrays (end_long and end_lat) are not sorted. The pixels_inundated"
+##                                                             f"works properly with both the initial and final coordinates arrays given in input"
+##                                                             f"which are properly  sorted  according to the convention defined in the"
+##                                                             f"sort_coordinate function")
+##
+    
+##    logging.debug("Sorting starts coordinates...")
+##    sort_coordinates(start_long, start_lat)
+##    logging.debug("Sorting end coordinates...")
+##    sort_coordinates(end_long, end_lat)
+    
     end_long_test=end_long
     end_lat_test=end_lat
     n_pixels_start=len(start_long)
@@ -169,6 +199,26 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     long_pixels_inundated=start_long[mask_pixels_inundated] 
     
     return long_pixels_inundated, lat_pixels_inundated
+
+def pixels_inundated_setdiff1d(start_coordinates, end_coordinates):
+    """given a pair of arrays (of longitudes and latitudes) of the pixels
+    of an initial distribution (start_long and start_lat)  describing  the dry land (continent function) and those of a
+    final distribution (end_long and end_lat), it returns the coordinate arrays of those pixels which disapear from the
+    initial distribution to the final ditribution; in other words, the pixels which have been inundated. 
+    """
+    
+##    assert check_coordinates_are_sorted(start_long, start_lat), (f"The starting coordinate arrays (start_long and start_lat) are not sorted. The pixels_inundated"
+##                                                                 f"works properly with both the initial and final coordinates arrays given in input"
+##                                                                 f"which are properly  sorted  according to the convention defined in the"
+##                                                                 f"sort_coordinate function")
+##    assert check_coordinates_are_sorted(end_long, end_lat), (f"The final coordinate arrays (end_long and end_lat) are not sorted. The pixels_inundated"
+##                                                             f"works properly with both the initial and final coordinates arrays given in input"
+##                                                             f"which are properly  sorted  according to the convention defined in the"
+##                                                             f"sort_coordinate function")
+
+    coord_pixels_inundated=np.setdiff1d(start_coordinates,end_coordinates)
+    
+    return coord_pixels_inundated
     
 
 
@@ -186,13 +236,22 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
                                                        f"and lat_acquaterra = {len(lat_acquaterra)} are different.")
     assert lat_min<lat_max, (f"Minimum latitude = {lat_min} of the rectangular region "
                             f"must be smaller than maximum latitude ={lat_max}.")
-    assert lat_min>=-90. and lat_min<90., (f"Latitudes are defined between -90 and 90 degrees."
-                                           f"So, minimum latitude= {lat_min} must be greater than or equal to -90 and less than 90.")
-    assert lat_max>-90. and lat_max<=90., (f"Maximum latitude= {lat_max} must be greater than -90 and less than or equal to 90.")
-    assert long_min>=0. and long_min<=360., (f"Longitudes are conventionally defined between 0 and 360 degrees."
-                                             f"Minimum longitudes= {long_min} is outside this range .")
-    assert long_max>=0. and long_max<=360., (f"Longitudes are conventionally defined between 0 and 360 degrees."
-                                             f"Maximum longitudes= {long_max} is outside this range.")
+    assert lat_min>=-90., (f"Minimum latitude= {lat_min} must be greater than or equal to -90"
+                          f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_min<90.,(f"Minimum latitude= {lat_min} must  be lower than 90."
+                        f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_max>-90., (f"Maximum latitude= {lat_max} must be greater than -90."
+                          f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_max<=90., (f"Maximum latitude= {lat_max} must be lower than or equal to 90."
+                          f"Latitudes are defined between -90 and 90 degrees.")
+    assert long_min>=0., (f"Minimum longitudes= {long_min} must be grater than or equal to 0 "
+                          f"Longitudes are conventionally defined between 0 and 360 degrees.")
+    assert long_min<=360., (f"Minimum longitudes= {long_min} must be lower than or equal to 360. "
+                           f"Longitudes are conventionally defined between 0 and 360 degrees.")
+    assert long_max>=0., (f"Maximunm longitudes= {long_max} must be grater than or equal to 0. "
+                         f"Longitudes are conventionally defined between 0 and 360 degrees.")
+    assert long_max<=360., (f"Maximunm longitudes= {long_max} must be lower than or equal to 360. "
+                            f"Longitudes are conventionally defined between 0 and 360 degrees.")
     
     n_pixels_acquaterra=len(long_acquaterra)
     mask_region=[]
@@ -229,10 +288,14 @@ def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
                                                        f"and lat_acquaterra = {len(lat_acquaterra)} are different.")
     assert lat_min<lat_max, (f"Minimum latitude = {lat_min} of the rectangular region "
                             f"must be smaller than maximum latitude ={lat_max}.")
-    assert lat_min>=-90. and lat_min<90., (f"Latitudes are defined between -90 and 90 degrees."
-                                           f"Minimum latitude= {lat_min} is outside this range.")
-    assert lat_max>-90. and lat_max<=90., (f"Latitudes are defined between -90 and 90 degrees."
-                                           f"Maximum latitude= {lat_max} is outside this range.")
+    assert lat_min>=-90., (f"Minimum latitude= {lat_min} must be greater than or equal to -90"
+                          f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_min<90.,(f"Minimum latitude= {lat_min} must  be lower than 90."
+                        f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_max>-90., (f"Maximum latitude= {lat_max} must be greater than -90."
+                          f"Latitudes are defined between -90 and 90 degrees.")
+    assert lat_max<=90., (f"Maximum latitude= {lat_max} must be lower than or equal to 90."
+                          f"Latitudes are defined between -90 and 90 degrees.")
     
     n_pixels_acquaterra=len(long_acquaterra)
     pixel_is_in_the_reagion=False
@@ -301,8 +364,8 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
                                                f"long_global = {len(long_global)}"
                                                f"and lat_global = {len(lat_global)} must be equal.")
 
-    sort_coordinates(long_acquaterra, lat_acquaterra)
-    sort_coordinates(long_global, lat_global)
+    #sort_coordinates(long_acquaterra, lat_acquaterra)
+    #sort_coordinates(long_global, lat_global)
     n_pixels_acquaterra=len(long_acquaterra)
     n_pixels_global=len(long_global)
     mask_pixels_acquaterra=[]
@@ -317,6 +380,8 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
             pixel_is_acquaterranian=True
             j=j+1
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
+    assert len(mask_pixels_acquaterra)==n_pixels_global, (f"Dimension of the mask mask_pixel_acquaterra = {len(mask_pixels_acquaterra)} "
+                                                          f"is different to the number of pixels of the global pixelization of the Earth's surface = {n_pixels_global}")
     assert j==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
                                     f"is different to the number of pixels of the acquaterra distribution = {n_pixels_acquaterra}")
     return mask_pixels_acquaterra
@@ -337,11 +402,20 @@ def time_derevative_function(time_function, time_step):
     
     
 
+def read_file_coordinates_as_2d_array(file_name):
+    os.chdir(dir_data)
+    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
+    n_coord=len(long)
+    coord_2d_array=np.empty((n_coord,2))
+    coord_2d_array[:,0]=long
+    coord_2d_array[:,1]=lat
+    return coord_2d_array
+
 def read_file_coordinates(file_name):
     os.chdir(dir_data)
     long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
-    
     return long, lat
 
 def read_file_field_on_earth_suf(file_name):
@@ -410,13 +484,15 @@ def main():
 
     
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
-    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)    
+    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
+    sort_coordinates_lexsort(long_CF_LGM, lat_CF_LGM)
+    sort_coordinates_lexsort(long_CF_present_day, lat_CF_present_day)
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
                                                      lat_CF_present_day)
-
     #Save the output
+
     logging.info("Saving output acquaterra distribution...")
     file_name="distribution_acquaeterra.dat"
     save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
@@ -437,6 +513,7 @@ def main():
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
     sea_level=topography*1.
     logging.info("Computing mean sea level on acquaterra")
+    sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
     sea_level_AT=sea_level[mask_sea_level_AT]
     mean_SL_AT=np.mean(sea_level_AT)
