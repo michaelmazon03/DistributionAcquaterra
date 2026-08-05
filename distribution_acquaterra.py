@@ -366,23 +366,29 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
 
     #sort_coordinates(long_acquaterra, lat_acquaterra)
     #sort_coordinates(long_global, lat_global)
+    logging.debug("Computing mask_pixels_acquaterra")
     n_pixels_acquaterra=len(long_acquaterra)
     n_pixels_global=len(long_global)
     mask_pixels_acquaterra=[]
 
-    j=0
+    #j=0
+    long_at_test=long_acquaterra.copy()
+    lat_at_test=lat_acquaterra.copy()
+    n_true=0
     for i in range(n_pixels_global):
        # n_pixels_end=len(global_long_test)
         pixel_is_acquaterranian=False
-        if j==n_pixels_acquaterra:
-            pixel_is_acquaterranian=False
-        elif long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
-            pixel_is_acquaterranian=True
-            j=j+1
+        for j in range(n_pixels_acquaterra):
+        #if j==n_pixels_acquaterra:
+            #pixel_is_acquaterranian=False
+            if long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
+                pixel_is_acquaterranian=True
+                n_true=n_true+1
+            #j=j+1
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
     assert len(mask_pixels_acquaterra)==n_pixels_global, (f"Dimension of the mask mask_pixel_acquaterra = {len(mask_pixels_acquaterra)} "
                                                           f"is different to the number of pixels of the global pixelization of the Earth's surface = {n_pixels_global}")
-    assert j==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
+    assert n_true==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
                                     f"is different to the number of pixels of the acquaterra distribution = {n_pixels_acquaterra}")
     return mask_pixels_acquaterra
 
@@ -562,8 +568,9 @@ def main():
     #save statistics
                            
     name_file="statistics_acquaterra.dat"
-    logging.debug("Saving statistics on file "+namefile+"...")
-    
+    logging.debug("Saving statistics on file "+name_file+"...")
+
+    os.chdir(dir_data)
     statistics=np.array([area_AT, mean_SL_AT, area_reg_AT, mean_SL_reg_AT,
                          perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant])
     description=np.array(["Area acquaterra [m^2]",
@@ -592,17 +599,19 @@ def main():
     logging.info("Computing time history of acquaterra")
     n_pixels_history_AT=np.zeros(n_time_step)
     for j in range(n_time_step):
-        #logging.debug("Computing distribution acquaterra at epoch "+labels_time_step[j]+" kyr BP")
+        logging.debug("Computing distribution acquaterra at epoch "+labels_time_step[j]+" kyr BP")
         file_name="continent."+labels_time_step[j]+".dat"
-        long_CF_current, lat_CF_current= read_file_coordinates(file_name)
 
+        
+        long_CF_current, lat_CF_current= read_file_coordinates(file_name)
+        sort_coordinates_lexsort(long_CF_current,lat_CF_current)
         long_AT_current, lat_AT_current=pixels_inundated(long_acquaterra,
                                                          lat_acquaterra,
-                                                         long_AT_current,
-                                                         lat_AT_current)
+                                                         long_CF_current,
+                                                         lat_CF_current)
             
         
-        file_name="coordinates_acquaterra"+labels_time_step[j]
+        file_name="coordinates_acquaterra"+labels_time_step[j]+".txt"
         save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
         n_pixels_history_AT[j]=len(long_AT_current)
 
