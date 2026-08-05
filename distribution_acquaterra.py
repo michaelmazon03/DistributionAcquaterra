@@ -3,17 +3,18 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.DEBUG)
 
 #definizione directory e file
-dir_home=os.getcwd()
-dir_output=dir_home+"\\output"
-dir_data=dir_home+"\\data"
+dir_home=Path.cwd()
+dir_output=dir_home / 'output'
+dir_data=dir_home / 'data'
 
-if not(os.path.isdir(dir_output)):
-    os.mkdir("output")
 
+if not(dir_output.exists()):
+    dir_output.mkdir(parents=True, exist_ok=True)
 
 
 labels_time_step=["000.0","000.5","001.0","001.5","002.0","002.5","003.0","003.5","004.0","004.5",
@@ -409,9 +410,9 @@ def time_derevative_function(time_function, time_step):
     
 
 def read_file_coordinates_as_2d_array(file_name):
-    os.chdir(dir_data)
-    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
-    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
+    #os.chdir(dir_data)
+    long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     n_coord=len(long)
     coord_2d_array=np.empty((n_coord,2))
     coord_2d_array[:,0]=long
@@ -419,28 +420,28 @@ def read_file_coordinates_as_2d_array(file_name):
     return coord_2d_array
 
 def read_file_coordinates(file_name):
-    os.chdir(dir_data)
-    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
-    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
+    #os.chdir(dir_data)
+    long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     return long, lat
 
 def read_file_field_on_earth_suf(file_name):
-    os.chdir(dir_data)
-    long=np.genfromtxt(file_name, comments='#', usecols=(0), dtype='f8')
-    lat=np.genfromtxt(file_name, comments='#', usecols=(1), dtype='f8')
-    field=np.genfromtxt(file_name, comments='#', usecols=(2), dtype='f8')
+    #os.chdir(dir_data)
+    long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
+    field=np.genfromtxt(dir_data / file_name, comments='#', usecols=(2), dtype='f8')
     
     return long, lat, field
 
 def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
     assert len(long_distrib)==len(lat_distrib)
-    os.chdir(dir_output)
+    #os.chdir(dir_output)
 
     n_distrib=len(long_distrib)
     res=np.zeros(n_distrib, dtype=[("var1",float),("var2",float)])
     res["var1"]=long_distrib
     res["var2"]=lat_distrib
-    f=open(file_name,"w")
+    f=open(dir_output / file_name,"w")
     np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
     f.close()
 
@@ -450,13 +451,13 @@ def save_plot_history_AT(history_AT,file_name):
     
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
-    os.chdir(dir_plot)
+    #os.chdir(dir_plot)
     plt.xlim(26,0)
     plt.plot(time_step,history_AT, color="r", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
     plt.ylabel('Area acquaterra [km^2 * 10^3]', fontsize=15)
     plt.xticks(np.arange(26,-1,-2))
-    plt.savefig(file_name, dpi=150)
+    plt.savefig(dir_output / file_name, dpi=150)
 
     return
 
@@ -464,7 +465,7 @@ def save_plot_history_AT(history_AT,file_name):
 def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
-    os.chdir(dir_plot)
+    #os.chdir(dir_plot)
     plt.xlim(26,0)
     plt.plot(time_step,time_derevative_AT, color="b", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
@@ -473,7 +474,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
     plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b"),   plt.legend(loc="lower right", fontsize=14)
 
-    plt.savefig(file_name, dpi=150)
+    plt.savefig(dir_output / file_name, dpi=150)
 
     return
 
@@ -570,7 +571,7 @@ def main():
     name_file="statistics_acquaterra.dat"
     logging.debug("Saving statistics on file "+name_file+"...")
 
-    os.chdir(dir_data)
+    #os.chdir(dir_data)
     statistics=np.array([area_AT, mean_SL_AT, area_reg_AT, mean_SL_reg_AT,
                          perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant])
     description=np.array(["Area acquaterra [m^2]",
@@ -586,7 +587,9 @@ def main():
     res=np.zeros(n_row, dtype=[("var1",str),("var2",float)])
     res["var1"]=description
     res["var2"]=statistics
-    f=open(name_file,"w")
+
+    path_file=dir_output / name_file
+    f=open(path_file,"w")
     np.savetxt(f,res,delimiter="",fmt="%s\t %f\t", newline=os.linesep, header="description\t value\t\t")
     f.close()
     
@@ -615,7 +618,7 @@ def main():
         save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
         n_pixels_history_AT[j]=len(long_AT_current)
 
-    history_acquaterra=n_pixels_history_AT/n_tot_pixel*100.
+    history_acquaterra=n_pixels_history_AT/n_total_pixel*100.
     history_acquaterra=np.flip(history_acquaterra)
     history_acquaterra=history_acquaterra*area_pixel*0.01*10**(-3.)
 
