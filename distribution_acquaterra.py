@@ -175,24 +175,38 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
         elif j==int(n_pixels_start/10.*5.):
             logging.debug("[5/10] of the process. Analized "+str(j)+" elements.")
         elif j==int(n_pixels_start/10.*6.):
-            logging.debug("[6/10] of the process. Analized "+str(j)+" elements.")
+            logging.debug("[6/10] of the process. Analized "+str(j)+" elements.")   
         elif j==int(n_pixels_start/10.*7.):
             logging.debug("[7/10] of the process. Analized "+str(j)+" elements.")
         elif j==int(n_pixels_start/10.*8.):
             logging.debug("[8/10] of the process. Analized "+str(j)+" elements.")
         elif j==int(n_pixels_start/10.*9.):
             logging.debug("[9/10] of the process. Analized "+str(j)+" elements.")
-        
+        mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
+        mask_long_is_in=np.isin(end_long_test,start_long[j])
+        mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
         pixel_has_been_inundated=True
-        for i in range(len(end_long_test)):
-            if start_long[j]==end_long_test[i] and start_lat[j]==end_lat_test[i]:
-                pixel_has_been_inundated=False
-                np.delete(end_long_test, range(0,i))
-                np.delete(end_lat_test, range(0,i))
-                break
-        
+        if True in np.array(mask_coord_is_in):
+            pixel_has_been_inundated=False
+            index_pixel_in_end_coord=np.where(np.array(mask_coord_is_in)==True)
+            index=index_pixel_in_end_coord[0]
+            end_long_test=end_long_test[index[0]:]
+            end_lat_test=end_lat_test[index[0]:]
+            
         mask_pixels_inundated.append(pixel_has_been_inundated)
+##        pixel_has_been_inundated=True
+##        for i in range(len(end_long_test)):
+##            if start_long[j]==end_long_test[i] and start_lat[j]==end_lat_test[i]:
+##                pixel_has_been_inundated=False
+####                np.delete(end_long_test, range(0,i))
+####                np.delete(end_lat_test, range(0,i))
+##                end_long_test=end_long_test[i:]
+##                end_lat_test=end_lat_test[i:]
+##                break
+##        
+##        mask_pixels_inundated.append(pixel_has_been_inundated)
 
+    
     assert len(mask_pixels_inundated)==len(start_long), (f"Mask vector = {len(mask_pixels_inundated)}"
                                                         f"must have the same dimension as the longitude vector = {len(start_lat)}"
                                                         f" to which it is applied.")
@@ -365,28 +379,23 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
                                                f"long_global = {len(long_global)}"
                                                f"and lat_global = {len(lat_global)} must be equal.")
 
-    #sort_coordinates(long_acquaterra, lat_acquaterra)
-    #sort_coordinates(long_global, lat_global)
     logging.debug("Computing mask_pixels_acquaterra")
     n_pixels_acquaterra=len(long_acquaterra)
     n_pixels_global=len(long_global)
     mask_pixels_acquaterra=[]
 
-    #j=0
     long_at_test=long_acquaterra.copy()
     lat_at_test=lat_acquaterra.copy()
     n_true=0
+
     for i in range(n_pixels_global):
-       # n_pixels_end=len(global_long_test)
         pixel_is_acquaterranian=False
         for j in range(n_pixels_acquaterra):
-        #if j==n_pixels_acquaterra:
-            #pixel_is_acquaterranian=False
             if long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
                 pixel_is_acquaterranian=True
                 n_true=n_true+1
-            #j=j+1
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
+
     assert len(mask_pixels_acquaterra)==n_pixels_global, (f"Dimension of the mask mask_pixel_acquaterra = {len(mask_pixels_acquaterra)} "
                                                           f"is different to the number of pixels of the global pixelization of the Earth's surface = {n_pixels_global}")
     assert n_true==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
@@ -618,7 +627,7 @@ def main():
         save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
         n_pixels_history_AT[j]=len(long_AT_current)
 
-    history_acquaterra=n_pixels_history_AT/n_total_pixel*100.
+    history_acquaterra=n_pixels_history_AT/n_total_pixels*100.
     history_acquaterra=np.flip(history_acquaterra)
     history_acquaterra=history_acquaterra*area_pixel*0.01*10**(-3.)
 
