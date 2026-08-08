@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import logging
 from pathlib import Path
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 #definizione directory e file
 dir_home=Path.cwd()
@@ -215,6 +215,8 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     
     return long_pixels_inundated, lat_pixels_inundated
 
+
+
 def pixels_inundated_setdiff1d(start_coordinates, end_coordinates):
     """given a pair of arrays (of longitudes and latitudes) of the pixels
     of an initial distribution (start_long and start_lat)  describing  the dry land (continent function) and those of a
@@ -388,17 +390,26 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     lat_at_test=lat_acquaterra.copy()
     n_true=0
 
+    
     for i in range(n_pixels_global):
         pixel_is_acquaterranian=False
-        for j in range(n_pixels_acquaterra):
-            if long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
-                pixel_is_acquaterranian=True
-                n_true=n_true+1
+        mask_lat_is_in=np.isin(  lat_acquaterra, lat_global[i])
+        mask_long_is_in=np.isin(long_acquaterra,long_global[i])
+        mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
+        
+##        for j in range(n_pixels_acquaterra):
+##            if long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
+##                pixel_is_acquaterranian=True
+##                n_true=n_true+1
+        if True in np.array(mask_coord_is_in):
+            pixel_is_acquaterranian=True
+            n_true=n_true+1
+        
         mask_pixels_acquaterra.append(pixel_is_acquaterranian)
 
     assert len(mask_pixels_acquaterra)==n_pixels_global, (f"Dimension of the mask mask_pixel_acquaterra = {len(mask_pixels_acquaterra)} "
                                                           f"is different to the number of pixels of the global pixelization of the Earth's surface = {n_pixels_global}")
-    assert n_true==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {j} "
+    assert n_true==n_pixels_acquaterra, (f"Number of acquaterra pixels found in the sets of all pixels of earth's surface = {n_true} "
                                     f"is different to the number of pixels of the acquaterra distribution = {n_pixels_acquaterra}")
     return mask_pixels_acquaterra
 
@@ -476,7 +487,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     time_step=np.arange(26,-0.5,-0.5)
     #os.chdir(dir_plot)
     plt.xlim(26,0)
-    plt.plot(time_step,time_derevative_AT, color="b", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.plot(time_step,AT_time_derevative, color="b", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
     plt.ylabel('AT area time derevative [km^2 * 10^3 / 500 yr]', fontsize=12)
     plt.xticks(np.arange(26,-1,-2))
@@ -629,7 +640,7 @@ def main():
 
     history_acquaterra=n_pixels_history_AT/n_total_pixels*100.
     history_acquaterra=np.flip(history_acquaterra)
-    history_acquaterra=history_acquaterra*area_pixel*0.01*10**(-3.)
+    history_acquaterra=history_acquaterra*area_pixels*0.01*10**(-3.)
 
     time_step=0.5
     time_derevative_AT=time_derevative_function(history_acquaterra, time_step)
@@ -643,7 +654,7 @@ def main():
     file_name='graph_evolution_acquaterra_area.png'
     save_plot_history_AT(history_acquaterra,file_name)
     file_name='graph_AT_area_time_derivative.png'
-    save_plot_AT_time_derevative(AT_time_derevative,file_name)
+    save_plot_AT_time_derevative(time_derevative_AT,file_name)
 
     return
 
