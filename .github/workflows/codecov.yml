@@ -15,8 +15,8 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v4
-		with:
-		  python-vertion: '3.8'
+        with:
+          python-vertion: '3.8'
 
       - name: Install dependencies
         run: pip install numpy mathplotlib.pyplot pytest pytest-cov
