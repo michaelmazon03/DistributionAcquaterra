@@ -253,31 +253,11 @@ def pixels_not_inundated(start_long, start_lat, end_long, end_lat):
 
 
 
-def pixels_inundated_setdiff1d(start_coordinates, end_coordinates):
-    """given a pair of arrays (of longitudes and latitudes) of the pixels
-    of an initial distribution (start_long and start_lat)  describing  the dry land (continent function) and those of a
-    final distribution (end_long and end_lat), it returns the coordinate arrays of those pixels which disapear from the
-    initial distribution to the final ditribution; in other words, the pixels which have been inundated. 
-    """
-    
-##    assert check_coordinates_are_sorted(start_long, start_lat), (f"The starting coordinate arrays (start_long and start_lat) are not sorted. The pixels_inundated"
-##                                                                 f"works properly with both the initial and final coordinates arrays given in input"
-##                                                                 f"which are properly  sorted  according to the convention defined in the"
-##                                                                 f"sort_coordinate function")
-##    assert check_coordinates_are_sorted(end_long, end_lat), (f"The final coordinate arrays (end_long and end_lat) are not sorted. The pixels_inundated"
-##                                                             f"works properly with both the initial and final coordinates arrays given in input"
-##                                                             f"which are properly  sorted  according to the convention defined in the"
-##                                                             f"sort_coordinate function")
 
-    coord_pixels_inundated=np.setdiff1d(start_coordinates,end_coordinates)
-    
-    return coord_pixels_inundated
     
 
 
-def determine_history_acquaterra(labels_time_step):
-    
-    return history_acquaterra
+
 
 def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
     """given a limited, rectangular region of on earth's surface indicated by the latitudes (lat_min and lat_max) and longitudes(long_min and long_max)
@@ -466,7 +446,6 @@ def time_derevative_function(time_function, time_step):
     
 
 def read_file_coordinates_as_2d_array(file_name):
-    #os.chdir(dir_data)
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     n_coord=len(long)
@@ -476,13 +455,11 @@ def read_file_coordinates_as_2d_array(file_name):
     return coord_2d_array
 
 def read_file_coordinates(file_name):
-    #os.chdir(dir_data)
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     return long, lat
 
 def read_file_field_on_earth_suf(file_name):
-    #os.chdir(dir_data)
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     field=np.genfromtxt(dir_data / file_name, comments='#', usecols=(2), dtype='f8')
@@ -491,7 +468,6 @@ def read_file_field_on_earth_suf(file_name):
 
 def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
     assert len(long_distrib)==len(lat_distrib)
-    #os.chdir(dir_output)
 
     n_distrib=len(long_distrib)
     res=np.zeros(n_distrib, dtype=[("var1",float),("var2",float)])
@@ -507,7 +483,6 @@ def save_plot_history_AT(history_AT,file_name):
     
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
-    #os.chdir(dir_plot)
     plt.xlim(26,0)
     plt.plot(time_step,history_AT, color="r", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
@@ -521,7 +496,6 @@ def save_plot_history_AT(history_AT,file_name):
 def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
-    #os.chdir(dir_plot)
     plt.xlim(26,0)
     plt.plot(time_step,AT_time_derevative, color="b", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
@@ -542,22 +516,29 @@ def main():
 
     #Determination of acquaterra (AT) distributio
     logging.info("Compiuting distibution acquaterra...")
+    
     file_CF_LGM="continent.026.0.dat"
     file_CF_present_day="continent.000.0.dat"
+    path_fileCF_LGM= dir_data / file_CF_LGM
+    path_fileCF_present_day= dir_data / file_CF_present_day
+
+    assert path_fileCF_LGM.exists(), (f"continent.026.0.dat is not present in the data directory")
+    assert path_fileCF_present_day.exists(), (f"continent.000.0.dat is not present in the data directory")
 
     
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
     long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
+    
     sort_coordinates_lexsort(long_CF_LGM, lat_CF_LGM)
     sort_coordinates_lexsort(long_CF_present_day, lat_CF_present_day)
+    
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
                                                      lat_CF_present_day)
     #Save the output
-
     logging.info("Saving output acquaterra distribution...")
-    file_name="distribution_acquaeterra.dat"
+    file_name="distribution_acquaterra.dat"
     save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
 
 
