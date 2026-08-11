@@ -3,7 +3,8 @@ This project has been entirely written in `Python` language and it is proven to 
 `3.12` and `3.13` versions. Furthermore, the following python modules are used:
 - numpy
 - matplotlib.pyplot
-After downloading the entire repository from [here](https://github.com/michaelmazon03/DistributionAcquaterra.git)
+
+After downloading the entire repository from [here](https://github.com/michaelmazon03/DistributionAcquaterra.git),
 you can execute the code by running the following command in your terminal in the project directory:
 
 ```bash
@@ -17,7 +18,7 @@ In **Input data**, we describe how the format of the input files must be.
 In the **method chapter**, we illustrate the approach we used to solve the problem, describing the main function
 we developed.
 
-Finally in **Output data and lots**, we show the several results of the project; specifically, 
+Finally in **Output data and plots**, we show the several results of the project; specifically, 
 how the output data are formatted and how the plots are parametrized.
 
 # Input data
@@ -125,8 +126,45 @@ As already said before, we define the AT distribution as the global region that 
 `continent.000.0.dat` using the function `read_file_coordinates`; then, we compare those CF distributions; specifically,
  we look for those pixels that are present in `continent.026.0.dat` and that have been disappeared in `continent.000.0.dat`.
  In other words, we look for those pixels that have been "inundated". This distribution is the desired acquaterra distribution and
- we perform this computation with the function `pixels_inundated`:
+ we perform this computation with the function `pixels_inundated`.\
+These operations are performed at the beginnig of the `main` function:
+
+```python
+def main():
+    
+	#Determination of acquaterra (AT) distributio
+    logging.info("Compiuting distibution acquaterra...")
+    file_CF_LGM="continent.026.0.dat"
+    file_CF_present_day="continent.000.0.dat"
+
+    
+    long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
+    long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
+    sort_coordinates_lexsort(long_CF_LGM, lat_CF_LGM)
+    sort_coordinates_lexsort(long_CF_present_day, lat_CF_present_day)
+    long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
+                                                     lat_CF_LGM,
+                                                     long_CF_present_day,
+                                                     lat_CF_present_day)  
+```
+
+The `read_file_coordinates` function takes the name of the txt file in input and returns the coordinates
+of the distribution as separated numpy arrays (`long` and `lat`) using the numpy function `np.genfromtxt`:
  
+```python
+def read_file_coordinates(file_name):
+    #os.chdir(dir_data)
+    long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
+    lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
+    return long, lat
+```
+
+The `sort_coordinates_lexsort` function sort the arraw coordinates first by ascending latitudes, then by
+ascending longitudes. This operation is required beacuse the `pixels_inundated` function has been initially designed
+with coordinates arraws properly sorted as input variables.
+
+Here's how `pixels_inundated` is like:
+
 ```python
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
 
@@ -155,10 +193,15 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     return long_pixels_inundated, lat_pixels_inundated
 ```
  
-this function takes two spatial distribution as input: the initial distribution identified by `start_long` and `start_lat`
+This function takes two spatial distribution as input: the initial distribution identified by `start_long` and `start_lat`
 and the final distribution described by `end_long` and `end_lat`; and search for the difference between those distributions
 exploiting the numpy built-in operation with the boolean mask as the operation of slicing with mask array and the function 
-`np.isin`.
+`np.isin`.\
+Finally, the function returns  the results in terms of coordinate numpy arrays: `long_pixels_inundated`, 
+`lat_pixels_inundated`.
+
+## Second step: Statistics
+## Third step: Acquaterra History 
 
 
 
