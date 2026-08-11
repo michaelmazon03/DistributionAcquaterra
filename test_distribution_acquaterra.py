@@ -7,9 +7,12 @@ from distribution_acquaterra import (sort_coordinates,
                                      regional_acquaterra,
                                      mask_pixels_acquaterra,
                                      zonal_acquaterra,
-                                     percentage_zonal_distrib_AT)
+                                     percentage_zonal_distrib_AT,
+                                     main)
 import numpy as np
 import pytest
+from pathlib import Path
+
 
 
 
@@ -624,6 +627,19 @@ def test_check_longitudes_are_not_sorted():
     lat=np.array([10., 10.,10.])
 
     assert not check_coordinates_are_sorted(long, lat)
+
+def test_output_txt_files_have_been_created():
+    dir_home=Path.cwd()
+    dir_output=dir_home / 'output'
+    path_distrib_acquaterra= dir_output / "distribution_acquaterra.dat"
+    path_regional_AT= dir_output / "distribution_AT_mediterranean_sea.dat"
+    path_statistics= dir_output / "statistics_acquaterra.dat"
+    main()
+    assert path_distrib_acquaterra.exists()
+    assert path_regional_AT.exists()
+    assert path_statistics.exists()
+
+    
 
     
 
