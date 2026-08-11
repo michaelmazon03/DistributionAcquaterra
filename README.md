@@ -1,5 +1,5 @@
 # DistributionAcquaterra
-
+[![codecov](https://codecov.io/gh/michaelmazon03/DistributionAcquaterra/graph/badge.svg?token=7Y45QKOQSU)](https://codecov.io/gh/michaelmazon03/DistributionAcquaterra)
 ## Introduction ##
 
 
