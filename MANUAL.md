@@ -97,14 +97,73 @@ for that pixel. The longitudes are conventionally defined between 0° and 360°,
 and the topography is expressed in meters [m].
 
 # Method
-After proceding to the description of the structure and the method used in the project, it is worth remebering the
+After proceeding to the description of the structure and the method used in the project, it is worth remembering the
 aim of this work, that is the determination of acquaterra spatial distribution and its time evolution; throughout the project
-we will also evaluate some statistics of acquaterra. We remember that the acquaterra 
+we will also evaluate some statistics of acquaterra. A more detailed description of the background theory can be found
+in the introduction of `README.md`, here we remember that the acquaterra 
 is the global region of Earth's surface that has been inundated from the last glacial maximum (the period of maximum 
 extension of the ice-sheets occurring about 26,000 yr BP) and the present day due to the rising sea-level.
 
 The main code `distribution_acquaterra.py` has been organized with a `main` function that calls several other
-function properly designed to read and elaborate the data input and to save and plot the results.
+functions properly designed to read and elaborate the data input and to save and plot the results.
+
+In the project we follow these steps:
+
+1. We determine the **Acquaterra distribution**;
+2. then we compute some **statistics** of acquaterra such as the mean sea-level on acquaterra, the zonal distribution and
+a regional distribution of acquaterra;
+3. finally, we calculate the **time evoluton** of acquaterra.
+
+The order of the steps above is random but they are strongly linked to each other, since the acquaterra distribution
+(`step 1`) is required to evaluate both the statistics and the history of acquaterra 
+(`step 2` and `step 3`, respectively).
+
+## Step 1: distribution acquaterra
+As already said before, we define the AT distribution as the global region that has been inundated from the LGM 
+(which, in our test data input, is fixed at 26 kyr BP) to the present day (0 kyr BP). Therefore, we proceed reading
+ the data input files of the continent function (CF) at LGM `continent.026.0.dat` and at present day 
+`continent.000.0.dat` using the function `read_file_coordinates`; then, we compare those CF distributions; specifically,
+ we look for those pixels that are present in `continent.026.0.dat` and that have been disappeared in `continent.000.0.dat`.
+ In other words, we look for those pixels that have been "inundated". This distribution is the desired acquaterra distribution and
+ we perform this computation with the function `pixels_inundated`:
+ 
+```python
+def pixels_inundated(start_long, start_lat, end_long, end_lat):
+
+	end_long_test=end_long
+	end_lat_test=end_lat
+	n_pixels_start=len(start_long)
+	mask_pixels_inundated=[]
+
+	for j in range(n_pixels_start):
+		mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
+		mask_long_is_in=np.isin(end_long_test,start_long[j])
+		mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
+		pixel_has_been_inundated=True
+		if True in np.array(mask_coord_is_in):
+			pixel_has_been_inundated=False
+			index_pixel_in_end_coord=np.where(np.array(mask_coord_is_in)==True)
+			index=index_pixel_in_end_coord[0]
+			end_long_test=end_long_test[index[0]:]
+			end_lat_test=end_lat_test[index[0]:]
+            
+	mask_pixels_inundated.append(pixel_has_been_inundated)
+
+	lat_pixels_inundated=start_lat[mask_pixels_inundated]
+	long_pixels_inundated=start_long[mask_pixels_inundated] 
+    
+    return long_pixels_inundated, lat_pixels_inundated
+```
+ 
+this function takes two spatial distribution as input: the initial distribution identified by `start_long` and `start_lat`
+and the final distribution described by `end_long` and `end_lat`; and search for the difference between those distributions
+exploiting the numpy built-in operation with the boolean mask as the operation of slicing with mask array and the function 
+`np.isin`.
+
+
+
+
+
 
 
 # Output data and plots
