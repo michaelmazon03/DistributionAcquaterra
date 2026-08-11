@@ -215,6 +215,42 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     
     return long_pixels_inundated, lat_pixels_inundated
 
+def pixels_not_inundated(start_long, start_lat, end_long, end_lat):
+    """given a pair of arrays (of longitudes and latitudes) of the pixels
+    of an initial distribution (start_long and start_lat)  describing  the dry land (continent function) and those of a
+    final distribution (end_long and end_lat), it returns the coordinate arrays of those pixels which which are present in both the
+    initial distribution and the final ditribution; in other words, the pixels which have not been inundated. 
+    """
+    assert len(start_long)==len(start_lat), (f"Dimensions of the coupled vectors of starting longitudes = {len(start_long)}"
+                                             f"and latitudes = {len(start_lat)} are different.")
+    assert len(end_long)==len(end_lat), (f"Dimensios of the coupled vectors of final longitudes = {len(end_long)}"
+                                             f"and latitudes = {len(end_lat)} are different.")
+
+    end_long_test=end_long
+    end_lat_test=end_lat
+    n_pixels_start=len(start_long)
+    mask_pixels_unalterated=[]
+
+    for j in range(n_pixels_start):
+        mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
+        mask_long_is_in=np.isin(end_long_test,start_long[j])
+        mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
+        pixel_is_still_dry_land=False
+        if True in np.array(mask_coord_is_in):
+            pixel_is_still_dry_land=True
+            
+        mask_pixels_unalterated.append(pixel_is_still_dry_land)
+
+
+    
+    assert len(mask_pixels_unalterated)==len(start_long), (f"Mask vector = {len(mask_pixels_inundated)}"
+                                                        f"must have the same dimension as the longitude vector = {len(start_lat)}"
+                                                        f" to which it is applied.")
+    lat_pixels_unalterated=start_lat[mask_pixels_unalterated]
+    long_pixels_unalterated=start_long[mask_pixels_unalterated] 
+    
+    return long_pixels_unalterated, lat_pixels_unalterated
+
 
 
 def pixels_inundated_setdiff1d(start_coordinates, end_coordinates):
@@ -628,7 +664,7 @@ def main():
         
         long_CF_current, lat_CF_current= read_file_coordinates(file_name)
         sort_coordinates_lexsort(long_CF_current,lat_CF_current)
-        long_AT_current, lat_AT_current=pixels_inundated(long_acquaterra,
+        long_AT_current, lat_AT_current=pixels_not_inundated(long_acquaterra,
                                                          lat_acquaterra,
                                                          long_CF_current,
                                                          lat_CF_current)
