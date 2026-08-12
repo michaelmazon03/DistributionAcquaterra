@@ -121,19 +121,19 @@ The order of the steps above is random but they are strongly linked to each othe
 
 ## Step 1: distribution acquaterra
 As already said before, we define the AT distribution as the global region that has been inundated from the LGM 
-(which, in our test data input, is fixed at 26 kyr BP) to the present day (0 kyr BP). Therefore, we proceed reading
+(which, in our test data input, is fixed at 26 kyr BP) to the present day (0 kyr BP). Therefore, we proceed by reading
  the data input files of the continent function (CF) at LGM `continent.026.0.dat` and at present day 
 `continent.000.0.dat` using the function `read_file_coordinates`; then, we compare those CF distributions; specifically,
- we look for those pixels that are present in `continent.026.0.dat` and that have been disappeared in `continent.000.0.dat`.
+ we look for those pixels that are present in `continent.026.0.dat` and that have disappeared in `continent.000.0.dat`.
  In other words, we look for those pixels that have been "inundated". This distribution is the desired acquaterra distribution and
  we perform this computation with the function `pixels_inundated`.\
-These operations are performed at the beginnig of the `main` function:
+These operations are performed at the beginning of the `main` function:
 
 ```python
 def main():
     
-	#Determination of acquaterra (AT) distributio
-    logging.info("Compiuting distibution acquaterra...")
+	#Determination of acquaterra (AT) distribution
+    logging.info("Computing distribution acquaterra...")
     file_CF_LGM="continent.026.0.dat"
     file_CF_present_day="continent.000.0.dat"
 
@@ -148,7 +148,7 @@ def main():
                                                      lat_CF_present_day)  
 ```
 
-The `read_file_coordinates` function takes the name of the txt file in input and returns the coordinates
+The `read_file_coordinates` function takes the name of the input txt file  and returns the coordinates
 of the distribution as separated numpy arrays (`long` and `lat`) using the numpy function `np.genfromtxt`:
  
 ```python
@@ -159,11 +159,11 @@ def read_file_coordinates(file_name):
     return long, lat
 ```
 
-The `sort_coordinates_lexsort` function sort the arraw coordinates first by ascending latitudes, then by
-ascending longitudes. This operation is required beacuse the `pixels_inundated` function has been initially designed
-with coordinates arraws properly sorted as input variables.
+The `sort_coordinates_lexsort` function sorts the array coordinates first by ascending latitudes, then by
+ascending longitudes. This operation is required because the `pixels_inundated` function has been initially designed
+with coordinate arrays properly sorted as input variables.
 
-Here's how `pixels_inundated` is like:
+Here is what `pixels_inundated` looks like:
 
 ```python
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
@@ -185,7 +185,7 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
 			end_long_test=end_long_test[index[0]:]
 			end_lat_test=end_lat_test[index[0]:]
             
-	mask_pixels_inundated.append(pixel_has_been_inundated)
+		mask_pixels_inundated.append(pixel_has_been_inundated)
 
 	lat_pixels_inundated=start_lat[mask_pixels_inundated]
 	long_pixels_inundated=start_long[mask_pixels_inundated] 
@@ -193,18 +193,164 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     return long_pixels_inundated, lat_pixels_inundated
 ```
  
-This function takes two spatial distribution as input: the initial distribution identified by `start_long` and `start_lat`
-and the final distribution described by `end_long` and `end_lat`; and search for the difference between those distributions
+This function takes two spatial distributions as input: the initial distribution identified by `start_long` and `start_lat`
+and the final distribution described by `end_long` and `end_lat`; and searchs for the difference between those distributions
 exploiting the numpy built-in operation with the boolean mask as the operation of slicing with mask array and the function 
 `np.isin`.\
 Finally, the function returns  the results in terms of coordinate numpy arrays: `long_pixels_inundated`, 
 `lat_pixels_inundated`.
 
-## Second step: Statistics
-## Third step: Acquaterra History 
+## Step 2: Statistics
+After computing the acquaterra distribution, we are ready to calculate some statistics and quantities associated
+with acquaterra itself, such as:
+
+- total **global area** of acquaterra;
+- the present day **mean sea level** in the acquaterra region;
+- a certain subregion of acquaterra and its area and mean sea level;
+- the zonal distribution of acquaterra.
+
+### Area and mean sea level of acquaterra
+Perhaps the most convenient features of the icosahedron-based pixelization on which **SELEN** and our code
+rely on is that the pixels through which we divide the Earth's surface have about the same area. At the beginning
+of the code we list some important parameters associated with the geometry of Earth and its pixelization:
+
+```python
+#Earth's parameters
+earth_radius=6371.
+R=100
+n_total_pixels=40*R*(R-1)+12
+area_pixels=(4*np.pi*earth_radius**2)/float(n_total_pixels)
+earth_area=4.*np.pi*earth_radius**2.
+```
+
+Therefore the total area of acquaterra can be easily evaluated as the total number of pixels of AT distribution
+times the area of each pixel (`area_pixels`).
+
+```python
+def main():
+	...
+	
+	#area acquaterra
+    n_pixels_AT=len(long_acquaterra)
+    area_AT=n_pixels_AT*area_pixels
+	
+	...
+```
+
+To calculate the present day mean sea level on AT we use the topography input data the format of which has been
+described in the **input data** section. Thus, we read the `topo.000.0.dat` with a proper function. Furthermore, we 
+remember that the sea level (SL) is the opposite of the topography (T): $SL(\gamma,t)=-T(\gamma,t)$.
+
+```python
+def main():
+	...
+
+	#MEAN SEA-LEVEL on acquaterra (AT)
+	
+    #reading file topography
+    file_name='topo.000.0.dat'
+    long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
+    sea_level=topography*(-1.)
+	
+    logging.info("Computing mean sea level on acquaterra")
+    sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
+    mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
+    sea_level_AT=sea_level[mask_sea_level_AT]
+    mean_SL_AT=np.mean(sea_level_AT)
+
+	...
+```
+
+we remember that the `topo.0xx.x.dat` files contain the topography field on the entire Earth's surface; in other words,
+they give, for each pixel, the value of topography, so they have all the pixels of the pixelization of Earth's surface.
+Therefore, after sorting the coordinate arrays of both the acquaterra (`long_acquaterra` and `lat_acquaterra`)
+and the global Earth (`long_global` and `lat_global`), we exploit the `mask_pixels_acquaterra` function which takes these 
+arrays as input and returns a boolean mask `mask_sea_level_AT` which describes the pixels of acquaterra on the
+global coordinate arrays. Finally, we obtain the array of sea level on AT by applying the operation of slicing with
+the boolean mask above and since all the pixels have the same area, we can evaluate the mean sea level on AT 
+`mean_SL_AT` by a simple mean operation (we used `np.mean`).
+
+### Regional Acquaterra
+Here we compute the same quantities as the previous section (so, the area and the mean sea-level) but we consider
+a subregion of AT. To do so we exploit the function `regional_acquaterra`:
+
+```python
+def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
+...
+
+```
+
+This function takes a rectangular region on Earth's surface in terms of coordinates limits (`long_min`, `long_max`, 
+`lat_min`, `lat_max`) and the coordinate arrays of AT distribution and returns the coordinate arrays of AT of the
+pixels which are inside the subregion taken into account. It is worth remembering that in the convention of this project the longitudes
+are defined between 0° and 360°; thus, `long_min` can be greater than `long_max` if the subregion contains the 0°
+meridian. The proper functioning of the function in this case has been tested in `test_distribution_acquaterra.py`.
+
+### Zonal Acquaterra
+In this part we evaluate the distribution of AT in the different zonal regions (regions delimited between two latitudes).
+This computation is performed by the function `percentage_zonal_distrib_AT` inside of which we conventionally defined the 
+following regions with the latitude limits:
+
+- Arctic (from 90° to 66°)
+- Northern mid-latitudes (from 66° to 23°)
+- Tropics (from 23° to -23°)
+- Southern mid-latitudes (from -23° to -66°)
+- Antarctic (from -66° to -90°)
+
+```python
+def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
+...
+
+```
+
+This function takes simply the AT coordinate arrays and gives the percentage of the AT area on each zonal region 
+defined above. It is worth  noting that we don't consider the pixels that sit exactly in the latitudes boundaries (that
+are 90°, 66°, 23°, -23°, -66° and -90°). Since the number of the pixels is very high we evaluated that we do 
+not make a big mistake by doing so. This property of the function has been tested in `test_distribution_acquaterra.py`.
+
+## Step 3: Acquaterra History
+In this last part, we calculate the time evolution of AT exploiting the  files `continent.0xx.x.dat` associated
+with intermediate epochs. We already described the format of these files in the `data input` section in this document.
 
 
+```python
+main():
+...
 
+	#Determination history acquaterra
+    logging.info("Computing time history of acquaterra")
+    n_pixels_history_AT=np.zeros(n_time_step)
+    for j in range(n_time_step):
+        logging.debug("Computing distribution acquaterra at epoch "+labels_time_step[j]+" kyr BP")
+        file_name="continent."+labels_time_step[j]+".dat"
+
+        long_CF_current, lat_CF_current= read_file_coordinates(file_name)
+        sort_coordinates_lexsort(long_CF_current,lat_CF_current)
+        long_AT_current, lat_AT_current=pixels_not_inundated(long_acquaterra,
+                                                         lat_acquaterra,
+                                                         long_CF_current,
+                                                         lat_CF_current)
+            
+        file_name="coordinates_acquaterra"+labels_time_step[j]+".txt"
+        save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
+        n_pixels_history_AT[j]=len(long_AT_current)
+
+    history_acquaterra=n_pixels_history_AT/n_total_pixels*100.
+    history_acquaterra=np.flip(history_acquaterra)
+    history_acquaterra=history_acquaterra*area_pixels*0.01*10**(-3.)
+
+    time_step=0.5
+    time_derevative_AT=time_derevative_function(history_acquaterra, time_step)
+
+```
+Here, at each iteration  of the loop we obtain the continent function (the coordinate arrays) for a certain epoch (`0xx.x` ky BP)
+ by reading the file `continent.0xx.x.dat`; then we compare the AT distribution with the CF distribution of 
+ an intermediate epoch. More specifically, we look for those pixels of the AT which are still present in the intermediate
+ epoch; in other words, they are the pixels that have not been inundated yet at that time. Then, for each time
+ we count these pixels and we store them in the numpy array `n_pixels_history_AT`. Finally, we convert this into AT area
+ exploiting the fact that each pixel has the same area as we have done before.
+ 
+ 
 
 
 
