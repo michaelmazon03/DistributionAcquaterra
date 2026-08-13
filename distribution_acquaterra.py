@@ -10,11 +10,24 @@ logging.basicConfig(level=logging.INFO)
 #definizione directory e file
 dir_home=Path.cwd()
 dir_output=dir_home / 'output'
+dir_output_distrib_AT=dir_output / 'distribution_acquaterra'
+dir_output_history_AT=dir_output / 'history_acquaterra'
+dir_output_stat=dir_output / 'statistics_acquaterra'
+dir_plot=dir_home / 'plot'
 dir_data=dir_home / 'data'
 
 
 if not(dir_output.exists()):
     dir_output.mkdir(parents=True, exist_ok=True)
+if not(dir_output_distrib_AT.exists()):
+    dir_output_distrib_AT.mkdir(parents=True, exist_ok=True)
+if not(dir_output_history_AT.exists()):
+    dir_output_history_AT.mkdir(parents=True, exist_ok=True)
+if not(dir_output_stat.exists()):
+    dir_output_stat.mkdir(parents=True, exist_ok=True)
+
+if not(dir_plot.exists()):
+    dir_plot.mkdir(parents=True, exist_ok=True)
 
 
 labels_time_step=["000.0","000.5","001.0","001.5","002.0","002.5","003.0","003.5","004.0","004.5",
@@ -466,14 +479,14 @@ def read_file_field_on_earth_suf(file_name):
     
     return long, lat, field
 
-def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_name):
+def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_path):
     assert len(long_distrib)==len(lat_distrib)
 
     n_distrib=len(long_distrib)
     res=np.zeros(n_distrib, dtype=[("var1",float),("var2",float)])
     res["var1"]=long_distrib
     res["var2"]=lat_distrib
-    f=open(dir_output / file_name,"w")
+    f=open(file_path,"w")
     np.savetxt(f,res,delimiter="",fmt="%f\t %f\t", newline=os.linesep, header="longitude\t latitude\t\t")
     f.close()
 
@@ -488,7 +501,7 @@ def save_plot_history_AT(history_AT,file_name):
     plt.xlabel('year BP [kyr]', fontsize=15)
     plt.ylabel('Area acquaterra [km^2 * 10^3]', fontsize=15)
     plt.xticks(np.arange(26,-1,-2))
-    plt.savefig(dir_output / file_name, dpi=150)
+    plt.savefig(dir_plot / file_name, dpi=150)
 
     return
 
@@ -504,7 +517,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
     plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
     plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b"),   plt.legend(loc="lower right", fontsize=14)
 
-    plt.savefig(dir_output / file_name, dpi=150)
+    plt.savefig(dir_plot / file_name, dpi=150)
 
     return
 
@@ -513,8 +526,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
 
 def main():
     
-
-    #Determination of acquaterra (AT) distributio
+    #Determination of acquaterra (AT) distribution
     logging.info("Compiuting distibution acquaterra...")
     
     file_CF_LGM="continent.026.0.dat"
@@ -525,7 +537,6 @@ def main():
     assert path_fileCF_LGM.exists(), (f"continent.026.0.dat is not present in the data directory")
     assert path_fileCF_present_day.exists(), (f"continent.000.0.dat is not present in the data directory")
 
-    
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
     long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
     
@@ -539,23 +550,22 @@ def main():
     #Save the output
     logging.info("Saving output acquaterra distribution...")
     file_name="distribution_acquaterra.dat"
-    save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_name)
+    file_path=dir_output_distrib_AT / file_name
+    save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_path)
 
 
     #STATISTICS ACQUATERRA
-
     logging.info("Computing some statistics of acquaterra distribution...")
 
     #area acquaterra
     n_pixels_AT=len(long_acquaterra)
     area_AT=n_pixels_AT*area_pixels
 
-    
     #MEAN SEA-LEVEL on acquaterra (AT)
     #reading file topography
     file_name='topo.000.0.dat'
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
-    sea_level=topography*1.
+    sea_level=topography*(-1.)
     logging.info("Computing mean sea level on acquaterra")
     sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
@@ -579,13 +589,12 @@ def main():
                                                 lat_acquaterra)
     
     #Save the output
-                           
     logging.debug("Saving output distribution acquaterra in "+des_region)
     file_name="distribution_AT_mediterranean_sea.dat"
-    save_coord_distrib_as_txt_file(reg_long_AT, reg_lat_AT, file_name)
+    file_path=dir_output_distrib_AT / file_name
+    save_coord_distrib_as_txt_file(reg_long_AT, reg_lat_AT, file_path)
 
     #area regional acquaterra
-
     n_pixels_reg_AT=len(reg_long_AT)
     area_reg_AT=n_pixels_reg_AT*area_pixels
 
@@ -604,11 +613,9 @@ def main():
     perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant= percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra)
 
     #save statistics
-                           
     name_file="statistics_acquaterra.dat"
     logging.debug("Saving statistics on file "+name_file+"...")
 
-    #os.chdir(dir_data)
     statistics=np.array([area_AT, mean_SL_AT, area_reg_AT, mean_SL_reg_AT,
                          perc_arctic, perc_north_mid_lat, perc_trop, perc_south_mid_lat, perc_ant])
     description=np.array(["Area acquaterra [m^2]",
@@ -625,15 +632,10 @@ def main():
     res["var1"]=description
     res["var2"]=statistics
 
-    path_file=dir_output / name_file
-    f=open(path_file,"w")
+    file_path=dir_output_stat / name_file
+    f=open(file_path,"w")
     np.savetxt(f,res,delimiter="",fmt="%s\t %f\t", newline=os.linesep, header="description\t value\t\t")
     f.close()
-    
-
-
-    
-    
     
     #Determination history acquaterra
     logging.info("Computing time history of acquaterra")
@@ -642,7 +644,6 @@ def main():
         logging.debug("Computing distribution acquaterra at epoch "+labels_time_step[j]+" kyr BP")
         file_name="continent."+labels_time_step[j]+".dat"
 
-        
         long_CF_current, lat_CF_current= read_file_coordinates(file_name)
         sort_coordinates_lexsort(long_CF_current,lat_CF_current)
         long_AT_current, lat_AT_current=pixels_not_inundated(long_acquaterra,
@@ -650,9 +651,9 @@ def main():
                                                          long_CF_current,
                                                          lat_CF_current)
             
-        
         file_name="coordinates_acquaterra"+labels_time_step[j]+".txt"
-        save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, file_name)
+        path_file=dir_output_history_AT / file_name
+        save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, path_file)
         n_pixels_history_AT[j]=len(long_AT_current)
 
     history_acquaterra=n_pixels_history_AT/n_total_pixels*100.

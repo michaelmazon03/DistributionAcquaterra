@@ -631,9 +631,9 @@ def test_check_longitudes_are_not_sorted():
 def test_output_txt_files_have_been_created():
     dir_home=Path.cwd()
     dir_output=dir_home / 'output'
-    path_distrib_acquaterra= dir_output / "distribution_acquaterra.dat"
-    path_regional_AT= dir_output / "distribution_AT_mediterranean_sea.dat"
-    path_statistics= dir_output / "statistics_acquaterra.dat"
+    path_distrib_acquaterra= dir_output / 'distribution_acquaterra' / "distribution_acquaterra.dat"
+    path_regional_AT= dir_output / 'distribution_acquaterra' / "distribution_AT_mediterranean_sea.dat"
+    path_statistics= dir_output / 'statistics_acquaterra'/ "statistics_acquaterra.dat"
     main()
     assert path_distrib_acquaterra.exists()
     assert path_regional_AT.exists()
