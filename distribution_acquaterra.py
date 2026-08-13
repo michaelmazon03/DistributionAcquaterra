@@ -177,24 +177,7 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
 
     logging.debug("Evaluating pixels inundated. Number of pixels to be valuated="+str(n_pixels_start)+ " ...")
     for j in range(n_pixels_start):
-        if j==int(n_pixels_start/10.):
-            logging.debug("[1/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*2.):
-            logging.debug("[2/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*3.):
-            logging.debug("[3/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*4.):
-            logging.debug("[4/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*5.):
-            logging.debug("[5/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*6.):
-            logging.debug("[6/10] of the process. Analized "+str(j)+" elements.")   
-        elif j==int(n_pixels_start/10.*7.):
-            logging.debug("[7/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*8.):
-            logging.debug("[8/10] of the process. Analized "+str(j)+" elements.")
-        elif j==int(n_pixels_start/10.*9.):
-            logging.debug("[9/10] of the process. Analized "+str(j)+" elements.")
+        
         mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
         mask_long_is_in=np.isin(end_long_test,start_long[j])
         mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
@@ -458,14 +441,7 @@ def time_derevative_function(time_function, time_step):
     
     
 
-def read_file_coordinates_as_2d_array(file_name):
-    long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
-    lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
-    n_coord=len(long)
-    coord_2d_array=np.empty((n_coord,2))
-    coord_2d_array[:,0]=long
-    coord_2d_array[:,1]=lat
-    return coord_2d_array
+
 
 def read_file_coordinates(file_name):
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
@@ -651,7 +627,7 @@ def main():
                                                          long_CF_current,
                                                          lat_CF_current)
             
-        file_name="coordinates_acquaterra"+labels_time_step[j]+".txt"
+        file_name="acquaterra."+labels_time_step[j]+".dat"
         path_file=dir_output_history_AT / file_name
         save_coord_distrib_as_txt_file(long_AT_current, lat_AT_current, path_file)
         n_pixels_history_AT[j]=len(long_AT_current)
