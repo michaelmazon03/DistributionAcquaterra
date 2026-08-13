@@ -351,8 +351,60 @@ Here, at each iteration  of the loop we obtain the continent function (the coord
  exploiting the fact that each pixel has the same area as we have done before.
  
  
-
-
-
-
 # Output data and plots
+In this last section we show the results of our project. We will describe the meaning and the format of the content
+of the output. 
+
+When the code is executed,  two directories, `output` and `plot`, are created.
+
+## Output directory
+The `output` directory contains itself the following other subfolders:
+
+- distribution_acquaterra
+- history_acquaterra
+- statistics_acquaterra
+
+### distribution_acquaterra folder
+Here you can find the `distribution_acquaterra.dat` txt file which is the final result of the step 1 in the `main`
+function. We have described this part of the function `main` in the `method` section of this document. The definition
+of the **acquaterra** distribution has been introduced in detail in `README.md` file; a brief review can be found
+in the subsection `Step 1` in this document.
+
+The `distribution_acquaterra.dat` contains two columns: `longitudes` and `latitudes`. Conventionally, `longitudes`
+are expressed between 0° and 360°, while `latitudes` are defined between -90° and 90°.
+
+Also, in the same directory there is `distribution_AT_mediterranean_sea.dat` file. This is the result of the
+`regional_acquaterra` function that is performed in `Step 2` among the computation of the statistics of AT. Its content
+and the format are the same as `distribution_acquaterra.dat`. As default, in  `regional_acquaterra` we use a rectangular
+region centered to the Mediterranean Sea but the user can use every desired region modifying the coordinates limits
+as variables input for the `regional_acquaterra` function.
+
+### History_acquaterra folder
+In this directory, the txt files `acquaterra.0xx.x.dat` are present. These files are the results of the 
+`Step 3` in the `main` function described in the `method`. Here we used the same convention for the prefix 
+`0xx.x` as for the `data` input files; that is, `0xx.x` represents the epoch in kilo-years before present (kyr BP).
+Thus, for example `acquaterra.026.0.dat`, `acquaterra.010.5.dat` and `acquaterra.00.0.dat` are, respectively,
+the distribution at the last glacial maximum (26 kyr BP), at 10.5 kyr BP and at present day (kyr BP). Specifically, each
+file contains the list of pixels of acquaterra which, at that epoch, have not been "inundated" yet; or in other words,
+it contains the pixels of AT where the continent function is equal to 1. It is worth remembering that the acquaterra
+distribution  has been defined and computed as the comparison between the CF at the last glacial maximum (26 kyr BP) 
+and the present day and does not take into account the intermediate epochs.
+
+The files `acquaterra.0xx.x.dat` have the same format of  `distribution_acquaterra.dat` file 
+described above; that is, it contains two columns: `longitudes` and `latitudes`. Conventionally, `longitudes`
+are expressed between 0° and 360°, while `latitudes` are defined between -90° and 90°.
+
+
+### Statistics_acquaterra folder
+Here you find `statistics_acquaterra.dat` that contains the results of the `Step 2` of the `main` function
+regarding the statistics of AT. Specifically, there is the **total area** and the **mean sea-level** of the global
+distribution of AT, the total area and mean sea-level of a limited rectangular region on Earth's surface, by default
+the Mediterranean sea is considered, and finally the zonal distribution of AT.
+
+## Plot
+In this directory, two plots are present. They are named `graph_evolution_acquaterra_area.png` and 
+`graph_AT_area_time_derivative.png` and featuring respectively, the time evolution of the area of the dry land of AT
+ and its time derivative. More specifically, they have both the time (in kyr BP) in the x axis and the area in unit of
+[$\text{km}^2 \times 10^3$] in the y axis for `graph_evolution_acquaterra_area.png` or the time derivative of the area 
+in units of [$\text{km}^2 \times 10^3/ 500 \text{yr}$] in y axis for `graph_AT_area_time_derivative.png` plot.
+
