@@ -1,6 +1,5 @@
 #file test.py
-from distribution_acquaterra import (sort_coordinates,
-                                     sort_coordinates_lexsort,
+from distribution_acquaterra import (sort_coordinates_lexsort,
                                      check_coordinates_are_sorted,
                                      pixels_inundated,
                                      pixels_not_inundated,
@@ -18,74 +17,7 @@ from pathlib import Path
 
 ###########################################
 
-def test_sorting_lat_is_correct():
 
-    """this function tests that the sort_coordinates function
-    sort the sequenze of coordinates long and lat first by ascending latitutude,
-    then by ascending longitude.
-
-    GIVEN: proper list of latitude and longitude
-    WHEN: I apply to the list the sort_coordinates function
-    THEN: the list of coordinates will be sorted by ascending
-    latitude and longitude
-    """
-    long=[250., 300., 280.]
-    lat=[30., -30.5, 20.5]
-    sort_coordinates(long,lat)
-
-    assert [long, lat]==[[300., 280., 250.],[-30.5, 20.5, 30.]]
-    assert [long, lat]!=[[250., 300., 280.],[30., -30.5, 20.5]]
-
-def test_sorting_long_is_correct():
-    """this function tests that the sort_coordinates function
-    sort properly the longitudes in ascnding order.
-
-    GIVEN:  list of latitudes of the same value and a list of longitudes
-    randomly ordered
-    WHEN: the sort_coordinates function is applied to the lists of longitude
-    and latitude
-    THEN: the list of coordinates will be sorted by ascending
-    longitude
-    """
-    long=[250., 300., 280.]
-    lat=[30., 30., 30.]
-    sort_coordinates(long,lat)
-
-    assert [long, lat]==[[250., 280., 300.],[30., 30., 30.]]
-    assert [long, lat]!=[[250., 300., 280.],[30., -30.5, 20.5]]
-
-def test_sorting_latitudes_already_sorted():
-    """this function tests that the sort_coordinates function gives the initial
-    lists of longitudes and latitudes if those are already sorted.
-
-    GIVEN:  lists latitude already
-    sorted and a list of longitude of the same value
-    WHEN: the sort_coordinates function is applied to the lists
-    THEN: the lists remain unchanged
-    """
-    initial_lat=[10., 20., 30.]
-    initial_long=[10.,10.,10.]
-    sort_coordinates(initial_long,initial_lat)
-    
-    assert [initial_long, initial_lat]==[[10.,10.,10.], [10., 20., 30.]]
-
-def test_sorting_longitudes_already_sorted():
-    """this function tests that the sort_coordinates function gives the initial
-    lists if the logitudes  are already sorted and latitudes are all identical.
-
-    GIVEN:  lists longitudes already sorted and a list of latitudes
-    of the same value
-    WHEN: the sort_coordinates function is applied to the lists 
-    THEN: the lists remain unchanged
-    """
-    initial_lat=[10.,10.,10.]
-    initial_long=[100.,200.,300.]
-    
-    lat_var=initial_lat
-    long_var=initial_long
-    sort_coordinates(long_var,lat_var)
-
-    assert [long_var, lat_var]==[initial_long, initial_lat]
 
 def test_sorting_with_nplexsort_lat_is_correct():
 
