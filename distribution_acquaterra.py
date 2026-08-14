@@ -190,26 +190,27 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
     n_pixels_acquaterra=len(long_acquaterra)
     mask_region=[]
     
-    pixel_is_in_the_reagion=False
+    
+    mask_lat_min_limit=lat_acquaterra>lat_min
+    mask_lat_max_limit=lat_acquaterra<lat_max
+    mask_lat=np.logical_and(mask_lat_min_limit,mask_lat_max_limit)
+    lat_regional_acquaterra=lat_acquaterra[mask_lat]
+    long_regional_acquaterra=long_acquaterra[mask_lat]
+    
+    if long_min<long_max:
+        mask_long_min= long_regional_acquaterra>long_min
+        mask_long_max= long_regional_acquaterra<long_max
+        mask_long=np.logical_and(mask_long_min,mask_long_max)
+    elif long_max<long_min:
+        mask_long_min=long_regional_acquaterra>long_min
+        mask_long_max=long_regional_acquaterra<long_max
+        mask_long=np.logical_or(mask_long_min,mask_long_max)
 
-    for i in range(n_pixels_acquaterra):
-        pixel_is_in_the_reagion=False
-        if long_min<long_max:
-            if long_acquaterra[i]>long_min and long_acquaterra[i]<long_max:
-                if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
-                    pixel_is_in_the_reagion=True
-        elif long_max<long_min:
-             if long_acquaterra[i]>long_min or long_acquaterra[i]<long_max:
-                if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
-                    pixel_is_in_the_reagion=True
-        mask_region.append(pixel_is_in_the_reagion)
-    assert len(mask_region)==len(long_acquaterra), (f"Dimenstion Mask vector = {len(mask_region)}"
-                                                    f"must be equal to the dimention of the  vectors = {len(long_acquaterra)}"
-                                                    f" to which it is applied.")
     
-    long_regional_acquaterra=long_acquaterra[mask_region]    
-    lat_regional_acquaterra=lat_acquaterra[mask_region]
     
+    lat_regional_acquaterra=lat_regional_acquaterra[mask_long]
+    long_regional_acquaterra=long_regional_acquaterra[mask_long]
+
     return long_regional_acquaterra, lat_regional_acquaterra
 
 def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
@@ -230,17 +231,13 @@ def zonal_acquaterra(lat_min, lat_max, long_acquaterra, lat_acquaterra):
                           f"Latitudes are defined between -90 and 90 degrees.")
     assert lat_max<=90., (f"Maximum latitude= {lat_max} must be lower than or equal to 90."
                           f"Latitudes are defined between -90 and 90 degrees.")
-    
-    n_pixels_acquaterra=len(long_acquaterra)
-    pixel_is_in_the_reagion=False
-    mask_region=[]
-    for i in range(n_pixels_acquaterra):
-        pixel_is_in_the_reagion=False
-        if lat_acquaterra[i]>lat_min and lat_acquaterra[i]<lat_max:
-            pixel_is_in_the_reagion=True
-        mask_region.append(pixel_is_in_the_reagion)
-    lat_zonal_AT=lat_acquaterra[mask_region]
-    long_zonal_AT=long_acquaterra[mask_region]
+
+    mask_lat_min_limit=lat_acquaterra>lat_min
+    mask_lat_max_limit= lat_acquaterra<lat_max
+    mask_lat=np.logical_and(mask_lat_min_limit,mask_lat_max_limit)
+    lat_zonal_AT=lat_acquaterra[mask_lat]
+    long_zonal_AT=long_acquaterra[mask_lat]
+
     return long_zonal_AT, lat_zonal_AT
 
 def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
