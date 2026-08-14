@@ -43,67 +43,14 @@ n_time_step=len(labels_time_step)
 
 #Earth's parameters
 earth_radius=6371.
-R=100
+R=44
 n_total_pixels=40*R*(R-1)+12
 area_pixels=(4*np.pi*earth_radius**2)/float(n_total_pixels)
 earth_area=4.*np.pi*earth_radius**2.
 
 
 
-def sort_coordinates(long,lat):
-    """sort the 1D numpy arrays of coordinates (long=longitude and lat=latitudes), first by ascending latitutude,
-    then by ascending longitude.
-    """
-    assert len(long)==len(lat), (
-        f"Dimension of the longitudes={len(long)} and latitudes={len(lat)} numpy vectors are different;"
-        f"since they are coupled, their dimensions must be equal."
-    )
-    
-    n_coord=len(long)
-    logging.debug("Sorting: number of pixels to be valuated="+str(n_coord)+ " ...")
-    for i in range(n_coord):
 
-        if i==int(n_coord/10.):
-            logging.debug("[1/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*2.):
-            logging.debug("[2/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*3.):
-            logging.debug("[3/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*4.):
-            logging.debug("[4/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*5.):
-            logging.debug("[5/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*6.):
-            logging.debug("[6/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*7.):
-            logging.debug("[7/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*8.):
-            logging.debug("[8/10] of the process. Sorted "+str(i)+" elements.")
-        elif i==int(n_coord/10.*9.):
-            logging.debug("[9/10] of the process. Sorted "+str(i)+" elements.")
-            
-        long_test=long[i]
-        lat_test=lat[i]
-        n_cycles=n_coord-i
-        index_min=i
-        for j in range(n_cycles):
-            if lat_test>lat[i+j]:
-                #if long_test>long[i+j]:
-                lat_test=lat[i+j]
-                long_test=long[i+j]
-                index_min=i+j
-            elif lat_test==lat[i+j] and long_test>long[i+j]:
-                lat_test=lat[i+j]
-                long_test=long[i+j]
-                index_min=i+j
-
-        lat[index_min]=lat[i]
-        long[index_min]=long[i]
-        lat[i]=lat_test
-        long[i]=long_test
-
-    logging.debug("Sorting complited")
-    return long, lat
 
 
 def sort_coordinates_lexsort(long,lat):
@@ -155,57 +102,25 @@ def pixels_inundated(start_long, start_lat, end_long, end_lat):
     assert len(end_long)==len(end_lat), (f"Dimensios of the coupled vectors of final longitudes = {len(end_long)}"
                                              f"and latitudes = {len(end_lat)} are different.")
 
-##    assert check_coordinates_are_sorted(start_long, start_lat), (f"The starting coordinate arrays (start_long and start_lat) are not sorted. The pixels_inundated"
-##                                                                 f"works properly with both the initial and final coordinates arrays given in input"
-##                                                                 f"which are properly  sorted  according to the convention defined in the"
-##                                                                 f"sort_coordinate function")
-##    assert check_coordinates_are_sorted(end_long, end_lat), (f"The final coordinate arrays (end_long and end_lat) are not sorted. The pixels_inundated"
-##                                                             f"works properly with both the initial and final coordinates arrays given in input"
-##                                                             f"which are properly  sorted  according to the convention defined in the"
-##                                                             f"sort_coordinate function")
-##
-    
-##    logging.debug("Sorting starts coordinates...")
-##    sort_coordinates(start_long, start_lat)
-##    logging.debug("Sorting end coordinates...")
-##    sort_coordinates(end_long, end_lat)
-    
-    end_long_test=end_long
-    end_lat_test=end_lat
     n_pixels_start=len(start_long)
     mask_pixels_inundated=[]
 
     logging.debug("Evaluating pixels inundated. Number of pixels to be valuated="+str(n_pixels_start)+ " ...")
     for j in range(n_pixels_start):
         
-        mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
-        mask_long_is_in=np.isin(end_long_test,start_long[j])
-        mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
+        mask_lat_is_in=np.isin(end_lat, start_lat[j])
+        mask_long_is_in=np.isin(end_long, start_long[j])
+        mask_coord_is_in=np.logical_and(mask_lat_is_in ,mask_long_is_in)
         pixel_has_been_inundated=True
         if True in np.array(mask_coord_is_in):
             pixel_has_been_inundated=False
-            index_pixel_in_end_coord=np.where(np.array(mask_coord_is_in)==True)
-            index=index_pixel_in_end_coord[0]
-            end_long_test=end_long_test[index[0]:]
-            end_lat_test=end_lat_test[index[0]:]
             
         mask_pixels_inundated.append(pixel_has_been_inundated)
-##        pixel_has_been_inundated=True
-##        for i in range(len(end_long_test)):
-##            if start_long[j]==end_long_test[i] and start_lat[j]==end_lat_test[i]:
-##                pixel_has_been_inundated=False
-####                np.delete(end_long_test, range(0,i))
-####                np.delete(end_lat_test, range(0,i))
-##                end_long_test=end_long_test[i:]
-##                end_lat_test=end_lat_test[i:]
-##                break
-##        
-##        mask_pixels_inundated.append(pixel_has_been_inundated)
 
-    
     assert len(mask_pixels_inundated)==len(start_long), (f"Mask vector = {len(mask_pixels_inundated)}"
-                                                        f"must have the same dimension as the longitude vector = {len(start_lat)}"
-                                                        f" to which it is applied.")
+                                                         f"must have the same dimension as the longitude vector = {len(start_lat)}"
+                                                         f" to which it is applied.")
+
     lat_pixels_inundated=start_lat[mask_pixels_inundated]
     long_pixels_inundated=start_long[mask_pixels_inundated] 
     
@@ -237,8 +152,6 @@ def pixels_not_inundated(start_long, start_lat, end_long, end_lat):
             
         mask_pixels_unalterated.append(pixel_is_still_dry_land)
 
-
-    
     assert len(mask_pixels_unalterated)==len(start_long), (f"Mask vector = {len(mask_pixels_inundated)}"
                                                         f"must have the same dimension as the longitude vector = {len(start_lat)}"
                                                         f" to which it is applied.")
@@ -246,14 +159,6 @@ def pixels_not_inundated(start_long, start_lat, end_long, end_lat):
     long_pixels_unalterated=start_long[mask_pixels_unalterated] 
     
     return long_pixels_unalterated, lat_pixels_unalterated
-
-
-
-
-    
-
-
-
 
 def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, lat_acquaterra):
     """given a limited, rectangular region of on earth's surface indicated by the latitudes (lat_min and lat_max) and longitudes(long_min and long_max)
@@ -408,11 +313,7 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
         mask_lat_is_in=np.isin(  lat_acquaterra, lat_global[i])
         mask_long_is_in=np.isin(long_acquaterra,long_global[i])
         mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
-        
-##        for j in range(n_pixels_acquaterra):
-##            if long_acquaterra[j]==long_global[i] and lat_acquaterra[j]==lat_global[i]:
-##                pixel_is_acquaterranian=True
-##                n_true=n_true+1
+
         if True in np.array(mask_coord_is_in):
             pixel_is_acquaterranian=True
             n_true=n_true+1
@@ -440,9 +341,6 @@ def time_derevative_function(time_function, time_step):
 
     
     
-
-
-
 def read_file_coordinates(file_name):
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
@@ -516,9 +414,7 @@ def main():
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
     long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
     
-    sort_coordinates_lexsort(long_CF_LGM, lat_CF_LGM)
-    sort_coordinates_lexsort(long_CF_present_day, lat_CF_present_day)
-    
+   
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
