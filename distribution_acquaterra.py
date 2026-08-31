@@ -194,6 +194,7 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
     mask_lat_min_limit=lat_acquaterra>lat_min
     mask_lat_max_limit=lat_acquaterra<lat_max
     mask_lat=np.logical_and(mask_lat_min_limit,mask_lat_max_limit)
+    
     lat_regional_acquaterra=lat_acquaterra[mask_lat]
     long_regional_acquaterra=long_acquaterra[mask_lat]
     
@@ -206,8 +207,6 @@ def regional_acquaterra(long_min, long_max, lat_min, lat_max, long_acquaterra, l
         mask_long_max=long_regional_acquaterra<long_max
         mask_long=np.logical_or(mask_long_min,mask_long_max)
 
-    
-    
     lat_regional_acquaterra=lat_regional_acquaterra[mask_long]
     long_regional_acquaterra=long_regional_acquaterra[mask_long]
 
@@ -281,7 +280,7 @@ def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
     assert perc_tropics>=0. and perc_tropics<=100., (f"perc_tropics ={perc_tropics} must be a percentage within 0 and 100%")
     perc_south_mid_lat=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
     assert perc_south_mid_lat>=0. and perc_south_mid_lat<=100., (f"perc_south_mid_lat ={perc_south_mid_lat} must be a percentage within 0 and 100%")
-    perc_antarctic=len(long_south_mid_latitudes)/n_pixels_acquaterra*100.
+    perc_antarctic=len(long_antarctic)/n_pixels_acquaterra*100.
     assert perc_antarctic>=0. and perc_antarctic<=100., (f"perc_antarctic ={perc_antarctic} must be a percentage within 0 and 100%")
 
     return perc_arctic, perc_north_mid_lat, perc_tropics, perc_south_mid_lat, perc_antarctic
@@ -289,6 +288,10 @@ def percentage_zonal_distrib_AT(long_acquaterra, lat_acquaterra):
 
     
 def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global):
+    """given the coordinate arrays of AT distribution (long_acquaterra, lat_acquaterra) and the coordinate arrays of the set of  all pixels of
+    the Earth's surface pixelization (long_global, lat_global), it returns a boolean np.array mask which identifies the pixels of the AT distribution
+    among the global set of pixels.
+    """
     assert len(long_acquaterra)==len(lat_acquaterra), (f"Dimentions of the coupled vectors long_acquaterra = {len(long_acquaterra)}"
                                                        f"and lat_acquaterra = {len(lat_acquaterra)} are diffferent.")
     assert len(long_global)==len(lat_global), (f"Dimentions of the coupled vectors of the coordinates of every pixels of earth's surface"
@@ -323,27 +326,33 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
                                     f"is different to the number of pixels of the acquaterra distribution = {n_pixels_acquaterra}")
     return mask_pixels_acquaterra
 
-def time_derevative_function(time_function, time_step):
+def time_derivative_function(time_function, time_step):
     
-    time_derevative=np.zeros(len(time_function))
+    time_derivative=np.zeros(len(time_function))
     rec_den=1./time_step
     for i in range(len(time_function)):
         if i==0:
-            time_derevative[i]=(time_function[i+1]-time_function[i])*rec_den
+            time_derivative[i]=(time_function[i+1]-time_function[i])*rec_den
         elif i==len(time_function)-1:
-            time_derevative[i]=(time_function[i]-time_function[i-1])*rec_den
+            time_derivative[i]=(time_function[i]-time_function[i-1])*rec_den
         else:
-            time_derevative[i]=((time_function[i]-time_function[i-1])*rec_den+(time_function[i+1]-time_function[i])*2.)*0.5
-    return time_derevative
+            time_derivative[i]=((time_function[i]-time_function[i-1])*rec_den+(time_function[i+1]-time_function[i])*2.)*0.5
+    return time_derivative
 
     
     
 def read_file_coordinates(file_name):
+    """given file_name of a txt file properly formatted, which describes the spatial distribution of a certain field on the Earth's surface in
+    terms of coordinates (longitudes and latitudes) in degree, it returns separate numpy arrays of the coordinates.
+    """
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     return long, lat
 
 def read_file_field_on_earth_suf(file_name):
+    """given file_name of a txt file properly formatted, which describes the a certain field on Earth's surface as a function of the coordinates
+    (longitudes and latitudes) in degree, it returns separate numpy arrays of the coordinates and the field.
+    """
     long=np.genfromtxt(dir_data / file_name, comments='#', usecols=(0), dtype='f8')
     lat=np.genfromtxt(dir_data / file_name, comments='#', usecols=(1), dtype='f8')
     field=np.genfromtxt(dir_data / file_name, comments='#', usecols=(2), dtype='f8')
@@ -351,6 +360,9 @@ def read_file_field_on_earth_suf(file_name):
     return long, lat, field
 
 def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_path):
+    """given separated coordinate numpy arrays  (long_distrib, lat_distrib) which describe the spatial distribution of a certain field on the Earth's surface and 
+    a file_path, a txt file with the coordinate numpy arrays as columns will be saved to the file_path of the main directory
+    """
     assert len(long_distrib)==len(lat_distrib)
 
     n_distrib=len(long_distrib)
@@ -364,7 +376,10 @@ def save_coord_distrib_as_txt_file(long_distrib, lat_distrib, file_path):
     return
 
 def save_plot_history_AT(history_AT,file_name):
+    """given the numpy array history_AT which describes the  acquaterra area variation in time and the file_name, it saves a very specific plot for that evolution
+    in the plot directory.
     
+    """
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
     plt.xlim(26,0)
@@ -377,13 +392,16 @@ def save_plot_history_AT(history_AT,file_name):
     return
 
 
-def save_plot_AT_time_derevative(AT_time_derevative,file_name):
+def save_plot_AT_time_derivative(AT_time_derivative,file_name):
+    """given the numpy array AT_time_derivative which describes the  acquaterra area variation in time and the file_name, it saves a very specific plot for that data
+    in the plot directory.
+    """
     plt.figure(figsize=(10,6))
     time_step=np.arange(26,-0.5,-0.5)
     plt.xlim(26,0)
-    plt.plot(time_step,AT_time_derevative, color="b", linestyle='-', lw=1, marker='o', markersize=3)
+    plt.plot(time_step,AT_time_derivative, color="b", linestyle='-', lw=1, marker='o', markersize=3)
     plt.xlabel('year BP [kyr]', fontsize=15)
-    plt.ylabel('AT area time derevative [km^2 * 10^3 / 500 yr]', fontsize=12)
+    plt.ylabel('AT area time derivative [km^2 * 10^3 / 500 yr]', fontsize=12)
     plt.xticks(np.arange(26,-1,-2))
     plt.axvspan(14.8,12.3, facecolor="#a2c4c9", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1a")
     plt.axvspan(11.5,8.8, facecolor="#a9c9a2", alpha=0.3, edgecolor="black", linestyle="--", label="WMP-1b"),   plt.legend(loc="lower right", fontsize=14)
@@ -397,7 +415,7 @@ def save_plot_AT_time_derevative(AT_time_derevative,file_name):
 
 def main():
     
-    #Determination of acquaterra (AT) distribution
+    #STEP 1: Acquaterra (AT) distribution
     logging.info("Compiuting distibution acquaterra...")
     
     file_CF_LGM="continent.026.0.dat"
@@ -411,30 +429,36 @@ def main():
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
     long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
     
-   
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
                                                      lat_CF_present_day)
-    #Save the output
+    #Save output AT distribution
     logging.info("Saving output acquaterra distribution...")
     file_name="distribution_acquaterra.dat"
     file_path=dir_output_distrib_AT / file_name
     save_coord_distrib_as_txt_file(long_acquaterra, lat_acquaterra, file_path)
 
 
-    #STATISTICS ACQUATERRA
+    #STEP 2: STATISTICS ACQUATERRA
     logging.info("Computing some statistics of acquaterra distribution...")
 
     #area acquaterra
     n_pixels_AT=len(long_acquaterra)
     area_AT=n_pixels_AT*area_pixels
 
-    #MEAN SEA-LEVEL on acquaterra (AT)
-    #reading file topography
+    #computing mean sea-level on AT
+    #reading file topography; 
     file_name='topo.000.0.dat'
+    path_file_topo_present_day= dir_data / file_name
+    
+    assert path_file_topo_present_day.exists(), (f"topo.000.0.dat is not present in the data directory")
+
+    #remember that by definition the sea level is the opposite of the topography and that the pixels
+    #(red in data files and with which the Earth's surface have been devided in) have the same area
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
     sea_level=topography*(-1.)
+
     logging.info("Computing mean sea level on acquaterra")
     sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
@@ -471,7 +495,7 @@ def main():
     #reading file topography
     file_name='topo.000.0.dat'
     long_global, lat_global, topography= read_file_field_on_earth_suf(file_name)
-    sea_level=topography*1.
+    sea_level=topography*(-1.)
     logging.info("Computing mean sea level on the regional acquaterra:" +des_region)
     mask_sl_reg_AT=mask_pixels_acquaterra(reg_long_AT, reg_lat_AT, long_global, lat_global)
     sea_level_reg_AT=sea_level[mask_sl_reg_AT]
@@ -497,13 +521,13 @@ def main():
                          "Percentage AT in southern mid latitudes  [%]",
                          "Percentage AT in antarctic  [%]"])
     n_row=len(statistics)
-    res=np.zeros(n_row, dtype=[("var1",str),("var2",float)])
+    res=np.zeros(n_row, dtype=[("var1",object),("var2",float)])
     res["var1"]=description
     res["var2"]=statistics
 
     file_path=dir_output_stat / name_file
     f=open(file_path,"w")
-    np.savetxt(f,res,delimiter="",fmt="%s\t %f\t", newline=os.linesep, header="description\t value\t\t")
+    np.savetxt(f,res,delimiter="\t",fmt=["%s", "%f"], newline=os.linesep, header="description\t value\t\t")
     f.close()
     
     #Determination history acquaterra
@@ -530,7 +554,7 @@ def main():
     history_acquaterra=history_acquaterra*area_pixels*0.01*10**(-3.)
 
     time_step=0.5
-    time_derevative_AT=time_derevative_function(history_acquaterra, time_step)
+    time_derivative_AT=time_derivative_function(history_acquaterra, time_step)
 
     
 
@@ -541,7 +565,7 @@ def main():
     file_name='graph_evolution_acquaterra_area.png'
     save_plot_history_AT(history_acquaterra,file_name)
     file_name='graph_AT_area_time_derivative.png'
-    save_plot_AT_time_derevative(time_derevative_AT,file_name)
+    save_plot_AT_time_derivative(time_derivative_AT,file_name)
 
     return
 
