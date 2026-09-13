@@ -67,7 +67,9 @@ python3 distribution_acquaterra.py
 ```
 
 ## Some results ##
-
-## Roadmap ##
+A couple of plots showing some of the project results are presented. Specifically, they  feature the time evolution of the AT area
+and its time derivative.
+![image](images/graph_evolution_acquaterra_area.png)
+![image](images/graph_AT_area_time_derivative.png)
 
 
