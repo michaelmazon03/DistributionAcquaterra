@@ -1,5 +1,5 @@
 # Introduction
-The background theory of this project can be found in the introduction of `README.md` file available in the
+The background theory of this project can be found in the introduction of [README.md](README.md) file available in the
 project repository while a brief review is given throughout  this document where it is needed.
 
 This manual text is organized into four chapters: Configuration, Input data, Method and Output data and plots.
@@ -28,8 +28,8 @@ python3 distribution_acquaterra.py
 ```
 
 # Input data
-As already pointed out in the `README.md` file, this project strongly exploits the output of **SELEN**, an open
-source software which solves the *sea-level equation* (SLE). One of the most peculiar characteristic of SELEN is that it 
+As already pointed out in the [README.md](README.md) file, this project strongly exploits the output of [SELEN](https://github.com/geodynamics/selen), an open
+source software which solves the *sea-level equation* (SLE). One of the most peculiar characteristic of [SELEN](https://github.com/geodynamics/selen) is that it 
 works on an icosahedron-based pixelization of Earth's surface; in other words, it  divide the Earth's surface into
  several pixels with about the same area and shape. This pixelization can be parametrized by a **resolution R** value. 
 Given a certain value of R, the total number of pixels the Earth's surface is divided in is:
@@ -73,9 +73,9 @@ and the present-day (0 kyr BP); with a certain time-step, typically 1 or 0.5 kyr
 
 
 ## Data input format
-A test data input is given in the project repository at the `data` directory; however, the user can use its own data
+A test data input is given in the project repository at the [data](data) directory; however, the user can use its own data
 if it is properly formatted as we will describe hereafter.\
-The files in `data` have been directly taken from the output of SELEN, therefore the name and the format of the 
+The files in [data](data) have been directly taken from the output of SELEN, therefore the name and the format of the 
 files are the ones defined for the output of SELEN. 
 
 The files are associated with the two quantities we are interested in, the continent function and the topography; and they are
@@ -114,11 +114,11 @@ of R=44.
 After proceeding to the description of the structure and the method used in the project, it is worth remembering the
 aim of this work, that is, the determination of acquaterra spatial distribution and its time evolution; throughout the project
 we will also evaluate some statistics of acquaterra. A more detailed description of the background theory can be found
-in the introduction of `README.md`, here we remember that the acquaterra 
+in the introduction of [README.md](README.md), here we remember that the acquaterra 
 is the global region of Earth's surface that has been inundated from the last glacial maximum (the period of maximum 
 extension of the ice-sheets occurring about 26,000 yr BP) and the present day due to the rising sea-level.
 
-The main code `distribution_acquaterra.py` has been organized with a `main` function that calls several other
+The main code [distribution_acquaterra.py](distribution_acquaterra.py) has been organized with a `main` function that calls several other
 functions properly designed to read and elaborate the data input and to save and plot the results.
 
 In the project we follow these steps:
@@ -153,8 +153,6 @@ def main():
     
     long_CF_LGM, lat_CF_LGM= read_file_coordinates(file_CF_LGM)
     long_CF_present_day, lat_CF_present_day= read_file_coordinates(file_CF_present_day)
-    sort_coordinates_lexsort(long_CF_LGM, lat_CF_LGM)
-    sort_coordinates_lexsort(long_CF_present_day, lat_CF_present_day)
     long_acquaterra, lat_acquaterra=pixels_inundated(long_CF_LGM,
                                                      lat_CF_LGM,
                                                      long_CF_present_day,
@@ -172,36 +170,27 @@ def read_file_coordinates(file_name):
     return long, lat
 ```
 
-The `sort_coordinates_lexsort` function sorts the array coordinates first by ascending latitudes, then by
-ascending longitudes. This operation is required because the `pixels_inundated` function has been initially designed
-with coordinate arrays properly sorted as input variables.
 
 Here is what `pixels_inundated` looks like:
 
 ```python
 def pixels_inundated(start_long, start_lat, end_long, end_lat):
-
-	end_long_test=end_long
-	end_lat_test=end_lat
 	n_pixels_start=len(start_long)
-	mask_pixels_inundated=[]
+    mask_pixels_inundated=[]
 
-	for j in range(n_pixels_start):
-		mask_lat_is_in=np.isin(  end_lat_test, start_lat[j])
-		mask_long_is_in=np.isin(end_long_test,start_long[j])
-		mask_coord_is_in=np.logical_and(mask_lat_is_in,mask_long_is_in)
-		pixel_has_been_inundated=True
-		if True in np.array(mask_coord_is_in):
-			pixel_has_been_inundated=False
-			index_pixel_in_end_coord=np.where(np.array(mask_coord_is_in)==True)
-			index=index_pixel_in_end_coord[0]
-			end_long_test=end_long_test[index[0]:]
-			end_lat_test=end_lat_test[index[0]:]
+    for j in range(n_pixels_start):
+        
+        mask_lat_is_in=np.isin(end_lat, start_lat[j])
+        mask_long_is_in=np.isin(end_long, start_long[j])
+        mask_coord_is_in=np.logical_and(mask_lat_is_in ,mask_long_is_in)
+        pixel_has_been_inundated=True
+        if True in np.array(mask_coord_is_in):
+            pixel_has_been_inundated=False
             
-		mask_pixels_inundated.append(pixel_has_been_inundated)
+        mask_pixels_inundated.append(pixel_has_been_inundated)
 
-	lat_pixels_inundated=start_lat[mask_pixels_inundated]
-	long_pixels_inundated=start_long[mask_pixels_inundated] 
+    lat_pixels_inundated=start_lat[mask_pixels_inundated]
+    long_pixels_inundated=start_long[mask_pixels_inundated] 
     
     return long_pixels_inundated, lat_pixels_inundated
 ```
@@ -230,7 +219,7 @@ of the code we list some important parameters associated with the geometry of Ea
 ```python
 #Earth's parameters
 earth_radius=6371.
-R=100
+R=44
 n_total_pixels=40*R*(R-1)+12
 area_pixels=(4*np.pi*earth_radius**2)/float(n_total_pixels)
 earth_area=4.*np.pi*earth_radius**2.
@@ -266,7 +255,6 @@ def main():
     sea_level=topography*(-1.)
 	
     logging.info("Computing mean sea level on acquaterra")
-    sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
     sea_level_AT=sea_level[mask_sea_level_AT]
     mean_SL_AT=np.mean(sea_level_AT)
@@ -276,8 +264,7 @@ def main():
 
 we remember that the `topo.0xx.x.dat` files contain the topography field on the entire Earth's surface; in other words,
 they give, for each pixel, the value of topography, so they have all the pixels of the pixelization of Earth's surface.
-Therefore, after sorting the coordinate arrays of both the acquaterra (`long_acquaterra` and `lat_acquaterra`)
-and the global Earth (`long_global` and `lat_global`), we exploit the `mask_pixels_acquaterra` function which takes these 
+Therefore, we exploit the `mask_pixels_acquaterra` function which takes these 
 arrays as input and returns a boolean mask `mask_sea_level_AT` which describes the pixels of acquaterra on the
 global coordinate arrays. Finally, we obtain the array of sea level on AT by applying the operation of slicing with
 the boolean mask above and since all the pixels have the same area, we can evaluate the mean sea level on AT 
@@ -350,10 +337,10 @@ main():
 
     history_acquaterra=n_pixels_history_AT/n_total_pixels*100.
     history_acquaterra=np.flip(history_acquaterra)
-    history_acquaterra=history_acquaterra*area_pixels*0.01*10**(-3.)
+    history_acquaterra=history_acquaterra*area_pixels
 
     time_step=0.5
-    time_derevative_AT=time_derevative_function(history_acquaterra, time_step)
+    time_derivative_AT=time_derivative_function(history_acquaterra, time_step)
 
 ```
 Here, at each iteration  of the loop we obtain the continent function (the coordinate arrays) for a certain epoch (`0xx.x` kyr BP)
@@ -365,7 +352,7 @@ Here, at each iteration  of the loop we obtain the continent function (the coord
  Then, we convert this into AT area exploiting the fact that each pixel has the same area as we have 
  done before.
  
-Moreover, we compute the time derivative of the area of AT using the function `time_derevative_function`. This takes
+Moreover, we compute the time derivative of the area of AT using the function `time_derivative_function`. This takes
 the array of the time evolution of AT area and the time step (expressed in kyr) as input and performs a difference
 finite derivative.
  
