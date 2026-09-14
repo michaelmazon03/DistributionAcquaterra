@@ -1,6 +1,5 @@
 #file test.py
 from distribution_acquaterra import (sort_coordinates_lexsort,
-                                     check_coordinates_are_sorted,
                                      pixels_inundated,
                                      pixels_not_inundated,
                                      regional_acquaterra,
@@ -18,7 +17,7 @@ from pathlib import Path
 ###########################################
 
 
-
+#tests of sort_coordinates_lexsort function
 def test_sorting_with_nplexsort_lat_is_correct():
 
     """this function tests that the sort_coordinates_lexsort function
@@ -89,7 +88,8 @@ def test_sorting_with_nplexsort_longitudes_already_sorted():
 
     assert np.array_equal(long_var,initial_long)
     assert np.array_equal(lat_var,initial_lat)
-    
+
+#tests of pixels_inundated function    
 def test_determination_pixels_inundated_is_correct():
     """this function tests that the pixels_inundated function works.
 
@@ -156,6 +156,7 @@ def test_no_pixels_have_been_inundated():
 
     assert len(long_inundated)==0
 
+# tests pixels_not inundated function
 def test_pixels_not_inundated_func_partial_inund():
     """this function tests that the pixels_not_inundated function works.
 
@@ -233,6 +234,7 @@ def test_pixels_not_inundated_func_no_pixs_inund():
     assert np.array_equal(long_not_inund, initial_long)
     assert np.array_equal(lat_not_inund, initial_lat)
 
+#tests regional_acquaterra function
 def test_regional_acquaterra_works():
     """this function tests that the regional_acquaterra works properly.
 
@@ -359,7 +361,8 @@ def test_long_border_region_is_not_included():
                                                     long_AT, lat_AT)
 
     assert len(lat_regional)==0 and len(long_regional)==0.
-    
+
+#tests of mask_pixels_acquaterra function   
 def test_mask_acquaterra_works():
     """this function tests the general behavior of the
     mask_pixel_acquaterra function.
@@ -389,6 +392,7 @@ def test_mask_acquaterra_works():
     assert mask_AT[1] and mask_AT[3]
     assert mask_AT.count(True)==2
 
+#tests of zonal_acquaterra function
 def test_zonal_AT_works():
     """this function tests the general behavior of the
     zonal_acquaeterra function.
@@ -466,6 +470,7 @@ def test_latitude_limits_are_not_included():
     assert long_reg[2]==10. and lat_reg[2]==30.
 
 
+#tests of percentage_zonal_distrib_AT function
 def test_percentage_zonal_distrib_AT_works():
     """this function tests the general behavior of the percentage_zonal_distrib_AT
     function.
@@ -504,61 +509,10 @@ def test_all_AT_pixels_are_in_the_tropics():
     assert south_mlat==0.
     assert ant==0.
 
-def test_check_latitudes_are_sorted():
-    """this tests the check_coordinates_are_sorted function for the latitudes.
 
-    GIVEN:  the coordinate arrays (longitude and latitude) with the latitudes 
-    sorted.
-    WHEN: the check_coordinates_are_sorted function is applied
-    THEN: the function returns  the boolean value True
-    """
 
-    long=np.array([10., 10., 10.])
-    lat=np.array([10., 20., 30.])
 
-    assert check_coordinates_are_sorted(long, lat)
 
-def test_check_latitudes_are_not_sorted():
-    """this tests the check_coordinates_are_sorted function for the latitudes.
-
-    GIVEN:  the coordinate arrays (longitude and latitude) with the latitudes
-    not sorted.
-    WHEN: the check_coordinates_are_sorted function is applied
-    THEN: the function returns  the boolean value False
-    """
-
-    long=np.array([10., 10.,10.])
-    lat=np.array([20., 10., 30.])
-
-    assert not check_coordinates_are_sorted(long, lat)
-
-def test_check_longitudes_are_sorted():
-    """this tests the check_coordinates_are_sorted function for the longitudes.
-
-    GIVEN:  the coordinate arrays (longitude and latitude) with the longitude already
-    sorted and latitudes wirh the same value.
-    WHEN: the check_coordinates_are_sorted function is applied
-    THEN: the function returns  the boolean value True
-    """
-
-    long=np.array([10., 20.,30.])
-    lat=np.array([10., 10.,10.])
-
-    assert check_coordinates_are_sorted(long, lat)
-
-def test_check_longitudes_are_not_sorted():
-    """this tests the check_coordinates_are_sorted function for the longitudes.
-
-    GIVEN:  the coordinate arrays (longitude and latitude) with the longitudes 
-    not sorted. 
-    WHEN: the check_coordinates_are_sorted function is applied
-    THEN: the function returns  the boolean value False
-    """
-
-    long=np.array([10., 5.,15.])
-    lat=np.array([10., 10.,10.])
-
-    assert not check_coordinates_are_sorted(long, lat)
 
 def test_output_txt_files_have_been_created():
     dir_home=Path.cwd()

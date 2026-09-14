@@ -551,11 +551,11 @@ def main():
 
     history_acquaterra=n_pixels_history_AT/n_total_pixels*100.
     history_acquaterra=np.flip(history_acquaterra)
-    history_acquaterra=history_acquaterra*area_pixels*0.01*10**(-3.)
+    history_acquaterra=history_acquaterra*area_pixels*1.
 
     time_step=0.5
     time_derivative_AT=time_derivative_function(history_acquaterra, time_step)
-
+    time_derivative_AT=time_derivative_AT
     
 
     #plot
