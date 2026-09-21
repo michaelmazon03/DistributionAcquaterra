@@ -71,23 +71,7 @@ def sort_coordinates_lexsort(long,lat):
     logging.debug("Sorting complited")
     return long, lat
 
-def check_coordinates_are_sorted(long, lat):
-    """check that the coordinate 1D arrays are already sorted according to the convention defined in the sort_coordinates function:
-    the coordinates are sorted first by ascending latitutude, then by ascending longitude. The function returns a boolean value.
-    """
-    assert len(long)==len(lat), (f"Dimensions of the coupled vectors of longitudes = {len(start_long)}"
-                                 f"and latitudes = {len(start_lat)} are different.")
 
-    n_coord=len(long)
-    arrays_are_sorted=True
-    for i in range(n_coord-1):
-        if lat[i]>lat[i+1]:
-            arrays_are_sorted=False
-        elif lat[i]==lat[i+1]:
-            if long[i]>long[i+1]:
-                arrays_are_sorted=False
-
-    return arrays_are_sorted
         
                 
         
@@ -327,6 +311,9 @@ def mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_glo
     return mask_pixels_acquaterra
 
 def time_derivative_function(time_function, time_step):
+    """given a vecto rrepreseting  a time function and a time_step, time_derivative_function returns a numpy array with the time derivatives
+    for each epoch calculated using the finite difference method.
+    """
     
     time_derivative=np.zeros(len(time_function))
     rec_den=1./time_step
@@ -336,7 +323,7 @@ def time_derivative_function(time_function, time_step):
         elif i==len(time_function)-1:
             time_derivative[i]=(time_function[i]-time_function[i-1])*rec_den
         else:
-            time_derivative[i]=((time_function[i]-time_function[i-1])*rec_den+(time_function[i+1]-time_function[i])*2.)*0.5
+            time_derivative[i]=((time_function[i]-time_function[i-1])*rec_den+(time_function[i+1]-time_function[i])*rec_den)*0.5
     return time_derivative
 
     

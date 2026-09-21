@@ -6,6 +6,7 @@ from distribution_acquaterra import (sort_coordinates_lexsort,
                                      mask_pixels_acquaterra,
                                      zonal_acquaterra,
                                      percentage_zonal_distrib_AT,
+                                     time_derivative_function,
                                      main)
 import numpy as np
 import pytest
@@ -509,12 +510,69 @@ def test_all_AT_pixels_are_in_the_tropics():
     assert south_mlat==0.
     assert ant==0.
 
+#tests time_derivative_function function
 
+def test_time_evolution_is_linear():
+    """this function tests the time_derivative_function in the case of a linear
+    function.
 
+    GIVEN: a numpy vector corresponding to a linear function with a
+    constant coefficent equal to 1 and a unit time step.
+    WHEN: the time_derivative_function is applied
+    THEN: the function returns a numpy array with all components equal to 1.
+    """
+    time_function=np.array([1.,2.,3.])
+    time_step=1.
+    time_derivative= time_derivative_function(time_function, time_step)
+    assert  np.array_equal(time_derivative, np.array([1.,1.,1.]))
 
+def test_time_evolution_is_constant():
+    """this function tests the time_derivative_function in the case of a constant
+    function.
 
+    GIVEN: a numpy vector corresponding to a constant function
+    and a unit time step.
+    WHEN: the time_derivative_function is applied
+    THEN: the function returns a numpy array with all components equal to zero.
+    """
+    time_function=np.array([1.,1.,1.])
+    time_step=1.
+    time_derivative= time_derivative_function(time_function, time_step)
+    assert  np.array_equal(time_derivative, np.array([0.,0.,0.]))
 
+def test_time_derivative_funtion_works():
+    """this function tests the general behavior of time_derivative_function.
+
+    GIVEN: a numpy vector corresponding to a time function and a unit time step.
+    WHEN: the time_derivative_function is applied
+    THEN: the function returns a numpy array with the time derivatives for each
+    epoch.
+    """
+    time_function=np.array([1.,2.,4.])
+    time_step=1.
+    time_derivative= time_derivative_function(time_function, time_step)
+    assert  np.array_equal(time_derivative, np.array([1.,1.5,2.]))
+
+def test_time_step_is_half_a_kyr():
+    """this function tests that the time_derivative_function works when varying the 
+    time-step.
+
+    GIVEN: a numpy vector corresponding to a linear time function and a time step equal to
+    0.5.
+    WHEN: the time_derivative_function is applied
+    THEN: the function returns a numpy array with all components equal to 2.
+    """
+    time_function=np.array([1.,2.,3.])
+    time_step=0.5
+    time_derivative= time_derivative_function(time_function, time_step)
+    assert  np.array_equal(time_derivative, np.array([2.,2.,2.]))
+
+#test main function
 def test_output_txt_files_have_been_created():
+    """this function tests that the main function correctly creates the output directory and
+    its subfolders.
+    """
+    
     dir_home=Path.cwd()
     dir_output=dir_home / 'output'
     path_distrib_acquaterra= dir_output / 'distribution_acquaterra' / "distribution_acquaterra.dat"
