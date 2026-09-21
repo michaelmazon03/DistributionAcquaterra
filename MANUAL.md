@@ -35,7 +35,7 @@ works on an icosahedron-based pixelization of Earth's surface; in other words, i
 Given a certain value of R, the total number of pixels the Earth's surface is divided in is:
 
 $$
-n_{\text{pixel}}=\frac{40R(R-1)}{12}
+n_{\text{pixel}}=40R(R-1)+12
 $$
 
 The area of each pixel is about:
@@ -86,7 +86,7 @@ named as:
 
 where the prefix `0xx.x` represents the time in terms of kyrs BP. For example, 
 `continent.000.0.dat` and `continent.011.5.dat` describe the solution for the continent function at the present-day
-(0 kyr BP) and at 11.5 kyr BP, respectively.
+(0 kyr BP) and at 11.5 kyr BP, respectively. In this project, only the `topo.000.0.dat` file for the topography will be used.
 
 ### Continent function data
 The `continent.0xx.x.dat` files consist of two columns which represent the **longitudes** and **latitudes**; where the rows
@@ -97,8 +97,8 @@ with a certain resolution;  therefore the number of rows must be less than or eq
 in the set defined by the pixelization, $n_\text{pixels}$.
 
 ### Topography data
-The `topo.0xx.x.dat` files consist  of three columns: **longitudes**, **latitudes** and **topography**; each file describes the topography
-field on the Earth's surface at the epoch 0xx.x kyr BP. Therefore, the number of rows coincides with the total number
+The `topo.000.0.dat` files consist  of three columns: **longitudes**, **latitudes** and **topography**;and describes the topography
+field on the Earth's surface at the present-day (000.0 kyr BP). Therefore, the number of rows coincides with the total number
 of pixels with which the Earth's surface has been divided by the pixellization and each row contains the value of topography
 for that pixel. The longitudes are conventionally defined between 0° and 360°, the latitudes are defined between -90° and 90°
 and the topography is expressed in meters [m].
