@@ -1,6 +1,5 @@
 #file test.py
-from distribution_acquaterra import (sort_coordinates_lexsort,
-                                     pixels_inundated,
+from distribution_acquaterra import (pixels_inundated,
                                      pixels_not_inundated,
                                      regional_acquaterra,
                                      mask_pixels_acquaterra,
@@ -17,78 +16,6 @@ from pathlib import Path
 
 ###########################################
 
-
-#tests of sort_coordinates_lexsort function
-def test_sorting_with_nplexsort_lat_is_correct():
-
-    """this function tests that the sort_coordinates_lexsort function
-    sort the   coordinates numpy arrays long and lat first by ascending latitutude,
-    then by ascending longitude.
-
-    GIVEN: proper list of latitude and longitude
-    WHEN: I apply to the list the sort_coordinates function
-    THEN: the list of coordinates will be sorted by ascending
-    latitude and longitude
-    """
-    long=np.array([250., 300., 280.])
-    lat=np.array([30., -30.5, 20.5])
-    sort_coordinates_lexsort(long,lat)
-
-    assert np.array_equal(long,np.array([300., 280., 250.]))
-    assert np.array_equal(lat,np.array([-30.5, 20.5, 30.]))
-
-def test_sorting_with_nplexsort_long_is_correct():
-    """this function tests that the sort_coordinates_lexsort function
-    sort properly the longitudes in ascnding order.
-
-    GIVEN:  list of latitudes of the same value and a list of longitudes
-    randomly ordered
-    WHEN: the sort_coordinates function is applied to the lists of longitude
-    and latitude
-    THEN: the list of coordinates will be sorted by ascending
-    longitude
-    """
-    long=np.array([250., 300., 280.])
-    lat=np.array([30., 30., 30.])
-    sort_coordinates_lexsort(long,lat)
-
-    assert np.array_equal(long,np.array([250., 280., 300.]))
-    assert np.array_equal(lat,np.array([30., 30., 30.]))
-
-def test_sorting_with_nplexsort_latitudes_already_sorted():
-    """this function tests that the sort_coordinates_lexsort function gives the initial
-    arrays  of longitudes and latitudes  if those are already sorted.
-
-    GIVEN:  lists latitude already
-    sorted and a list of longitude of the same value
-    WHEN: the sort_coordinates function is applied to the lists
-    THEN: the lists remain unchanged
-    """
-    initial_lat=np.array([10., 20., 30.])
-    initial_long=np.array([10.,10.,10])
-    sort_coordinates_lexsort(initial_long,initial_lat)
-
-    assert np.array_equal(initial_long,np.array([10.,10.,10.]))
-    assert np.array_equal(initial_lat,np.array([10., 20., 30.]))
-
-def test_sorting_with_nplexsort_longitudes_already_sorted():
-    """this function tests that the sort_coordinates_lexsort function gives the initial
-    arrays if the logitudes  are already sorted and latitudes are all identical.
-
-    GIVEN:  lists longitudes already sorted and a list of latitudes
-    of the same value
-    WHEN: the sort_coordinates function is applied to the lists 
-    THEN: the lists remain unchanged
-    """
-    initial_lat=np.array([10.,10.,10.])
-    initial_long=np.array([100.,200.,300.])
-    
-    lat_var=initial_lat.copy()
-    long_var=initial_long.copy()
-    sort_coordinates_lexsort(long_var,lat_var)
-
-    assert np.array_equal(long_var,initial_long)
-    assert np.array_equal(lat_var,initial_lat)
 
 #tests of pixels_inundated function    
 def test_determination_pixels_inundated_is_correct():

@@ -53,23 +53,7 @@ earth_area=4.*np.pi*earth_radius**2.
 
 
 
-def sort_coordinates_lexsort(long,lat):
-    """sort the 1D numpy arrays of coordinates (long=longitude and lat=latitudes), first by ascending latitutude,
-    then by ascending longitude.
-    """
-    assert len(long)==len(lat), (
-        f"Dimension of the longitudes={len(long)} and latitudes={len(lat)} numpy vectors are different;"
-        f"since they are coupled, their dimensions must be equal."
-    )
-    
-    
-    indices=np.lexsort((long,lat))
 
-    long[:]=long[indices]
-    lat[:]=lat[indices]
-    
-    logging.debug("Sorting complited")
-    return long, lat
 
 
         
@@ -447,7 +431,6 @@ def main():
     sea_level=topography*(-1.)
 
     logging.info("Computing mean sea level on acquaterra")
-    sort_coordinates_lexsort(long_acquaterra, lat_acquaterra)
     mask_sea_level_AT=mask_pixels_acquaterra(long_acquaterra, lat_acquaterra, long_global, lat_global)
     sea_level_AT=sea_level[mask_sea_level_AT]
     mean_SL_AT=np.mean(sea_level_AT)
@@ -525,7 +508,6 @@ def main():
         file_name="continent."+labels_time_step[j]+".dat"
 
         long_CF_current, lat_CF_current= read_file_coordinates(file_name)
-        sort_coordinates_lexsort(long_CF_current,lat_CF_current)
         long_AT_current, lat_AT_current=pixels_not_inundated(long_acquaterra,
                                                          lat_acquaterra,
                                                          long_CF_current,
