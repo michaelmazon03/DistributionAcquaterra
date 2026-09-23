@@ -62,10 +62,15 @@ The dependencies of the code are the following python modules:
 
 To execute the script of the project, run the following command in your terminal inside the project directory:
 
-```
+```bash
 python3 distribution_acquaterra.py
 ```
 
+while to run the tests, use:
+
+```bash
+pytest -v test_distribution_acquaterra.py
+```
 ## Some results ##
 A couple of plots showing some of the project results are presented. Specifically, they  feature the time evolution of the AT area
 and its time derivative.
