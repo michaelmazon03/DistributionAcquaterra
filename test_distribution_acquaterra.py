@@ -184,8 +184,10 @@ def test_regional_acquaterra_works():
                                                     lat_min_reg, lat_max_reg,
                                                     long_AT, lat_AT)
 
-    assert len(lat_regional)==1 and len(long_regional)==1
-    assert lat_regional[0]==10. and long_regional[0]==20.
+    assert len(lat_regional)==1
+    assert len(long_regional)==1
+    assert lat_regional[0]==10.
+    assert long_regional[0]==20.
     
 
 def test_longitude_on_regional_AT():
@@ -214,8 +216,10 @@ def test_longitude_on_regional_AT():
                                                     lat_min_reg, lat_max_reg,
                                                     long_AT, lat_AT)
 
-    assert len(lat_regional)==1 and len(long_regional)==1
-    assert lat_regional[0]==10. and long_regional[0]==1.
+    assert len(lat_regional)==1
+    assert len(long_regional)==1
+    assert lat_regional[0]==10.
+    assert long_regional[0]==1.
     
 def test_longitude_smaller_than_360_on_region():
     """this function tests the case of the region that include longitude=0,
@@ -240,8 +244,10 @@ def test_longitude_smaller_than_360_on_region():
                                                     lat_min_reg, lat_max_reg,
                                                     long_AT, lat_AT)
 
-    assert len(lat_regional)==1 and len(long_regional)==1
-    assert lat_regional[0]==10. and long_regional==-1.
+    assert len(lat_regional)==1
+    assert len(long_regional)==1
+    assert lat_regional[0]==10.
+    assert long_regional==-1.
 
     
 def test_lat_border_region_is_not_included():
@@ -265,7 +271,8 @@ def test_lat_border_region_is_not_included():
                                                     lat_min_reg, lat_max_reg,
                                                     long_AT, lat_AT)
 
-    assert len(lat_regional)==0 and len(long_regional)==0
+    assert len(lat_regional)==0
+    assert len(long_regional)==0
 
 def test_long_border_region_is_not_included():
     """this function tests the fact that the regioal_acquaeterra function
@@ -288,7 +295,8 @@ def test_long_border_region_is_not_included():
                                                     lat_min_reg, lat_max_reg,
                                                     long_AT, lat_AT)
 
-    assert len(lat_regional)==0 and len(long_regional)==0.
+    assert len(lat_regional)==0
+    assert len(long_regional)==0.
 
 #tests of mask_pixels_acquaterra function   
 def test_mask_acquaterra_works():
@@ -317,7 +325,8 @@ def test_mask_acquaterra_works():
 
     mask_AT=mask_pixels_acquaterra(long_AT, lat_AT, global_long, global_lat)
     assert len(mask_AT)==5
-    assert mask_AT[1] and mask_AT[3]
+    assert mask_AT[1]
+    assert mask_AT[3]
     assert mask_AT.count(True)==2
 
 #tests of zonal_acquaterra function
@@ -337,9 +346,12 @@ def test_zonal_AT_works():
     lat_max=40.
     long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
     assert len(long_reg)==3
-    assert long_reg[0]==10. and lat_reg[0]==0.
-    assert long_reg[1]==10. and lat_reg[1]==15.
-    assert long_reg[2]==10. and lat_reg[2]==30.
+    assert long_reg[0]==10.
+    assert lat_reg[0]==0.
+    assert long_reg[1]==10.
+    assert lat_reg[1]==15.
+    assert long_reg[2]==10.
+    assert lat_reg[2]==30.
 
 def test_no_AT_pixels_in_zonal_region():
     """this function tests the zonal_acquaterra function in the case of no
@@ -374,7 +386,8 @@ def test_all_AT_pixels_are_in_the_zonal_reg():
     lat_max=60.
     long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
     assert len(long_reg)==6
-    assert long_reg.all()==long_AT.all() and lat_reg.all()==lat_AT.all()
+    assert np.array_equal(long_reg,long_AT)
+    assert np.array_equal(lat_reg,lat_AT)
 
 def test_latitude_limits_are_not_included():
     """this function tests the fact that the zonal_acquaterra function
@@ -393,9 +406,12 @@ def test_latitude_limits_are_not_included():
     lat_max=40.
     long_reg, lat_reg=zonal_acquaterra(lat_min, lat_max, long_AT, lat_AT)
     assert len(long_reg)==3
-    assert long_reg[0]==10. and lat_reg[0]==0.
-    assert long_reg[1]==10. and lat_reg[1]==15.
-    assert long_reg[2]==10. and lat_reg[2]==30.
+    assert long_reg[0]==10.
+    assert lat_reg[0]==0.
+    assert long_reg[1]==10.
+    assert lat_reg[1]==15.
+    assert long_reg[2]==10.
+    assert lat_reg[2]==30.
 
 
 #tests of percentage_zonal_distrib_AT function
